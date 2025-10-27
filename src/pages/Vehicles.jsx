@@ -74,180 +74,185 @@ const Vehicles = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-primary-900">Vehículos Disponibles</h1>
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md"
-        >
-          {showFilters ? 'Ocultar Filtros' : 'Mostrar Filtros'}
-        </button>
-      </div>
+    <div className="min-h-screen font-sans text-gray-900 bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Vehículos Disponibles</h1>
+            <p className="text-gray-600 mt-2">Encuentra el vehículo perfecto para ti</p>
+          </div>
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+          >
+            {showFilters ? 'Ocultar Filtros' : 'Mostrar Filtros'}
+          </button>
+        </div>
 
-      {/* Filters */}
-      {showFilters && (
-        <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-primary-700 mb-1">
-                Marca
-              </label>
-              <input
-                type="text"
-                name="brand"
-                value={filters.brand}
-                onChange={handleFilterChange}
-                className="w-full px-3 py-2 border border-primary-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                placeholder="Ej: Toyota"
-              />
-            </div>
+        {/* Filters */}
+        {showFilters && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-8">
+            <h3 className="font-semibold text-gray-900 mb-6">Filtros de búsqueda</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Marca
+                </label>
+                <input
+                  type="text"
+                  name="brand"
+                  value={filters.brand}
+                  onChange={handleFilterChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
+                  placeholder="Ej: Toyota"
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-primary-700 mb-1">
-                Modelo
-              </label>
-              <input
-                type="text"
-                name="model"
-                value={filters.model}
-                onChange={handleFilterChange}
-                className="w-full px-3 py-2 border border-primary-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                placeholder="Ej: Corolla"
-              />
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Modelo
+                </label>
+                <input
+                  type="text"
+                  name="model"
+                  value={filters.model}
+                  onChange={handleFilterChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
+                  placeholder="Ej: Corolla"
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-primary-700 mb-1">
-                Precio Mínimo
-              </label>
-              <input
-                type="number"
-                name="minPrice"
-                value={filters.minPrice}
-                onChange={handleFilterChange}
-                className="w-full px-3 py-2 border border-primary-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                placeholder="0"
-              />
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Precio Mínimo
+                </label>
+                <input
+                  type="number"
+                  name="minPrice"
+                  value={filters.minPrice}
+                  onChange={handleFilterChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
+                  placeholder="0"
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-primary-700 mb-1">
-                Precio Máximo
-              </label>
-              <input
-                type="number"
-                name="maxPrice"
-                value={filters.maxPrice}
-                onChange={handleFilterChange}
-                className="w-full px-3 py-2 border border-primary-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                placeholder="100000000"
-              />
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Precio Máximo
+                </label>
+                <input
+                  type="number"
+                  name="maxPrice"
+                  value={filters.maxPrice}
+                  onChange={handleFilterChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
+                  placeholder="100000000"
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-primary-700 mb-1">
-                Año Mínimo
-              </label>
-              <input
-                type="number"
-                name="minYear"
-                value={filters.minYear}
-                onChange={handleFilterChange}
-                className="w-full px-3 py-2 border border-primary-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                placeholder="2000"
-              />
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Año Mínimo
+                </label>
+                <input
+                  type="number"
+                  name="minYear"
+                  value={filters.minYear}
+                  onChange={handleFilterChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
+                  placeholder="2000"
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-primary-700 mb-1">
-                Año Máximo
-              </label>
-              <input
-                type="number"
-                name="maxYear"
-                value={filters.maxYear}
-                onChange={handleFilterChange}
-                className="w-full px-3 py-2 border border-primary-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                placeholder="2024"
-              />
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Año Máximo
+                </label>
+                <input
+                  type="number"
+                  name="maxYear"
+                  value={filters.maxYear}
+                  onChange={handleFilterChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
+                  placeholder="2024"
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-primary-700 mb-1">
-                Ubicación
-              </label>
-              <input
-                type="text"
-                name="location"
-                value={filters.location}
-                onChange={handleFilterChange}
-                className="w-full px-3 py-2 border border-primary-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                placeholder="Ej: Manizales"
-              />
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Ubicación
+                </label>
+                <input
+                  type="text"
+                  name="location"
+                  value={filters.location}
+                  onChange={handleFilterChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
+                  placeholder="Ej: Manizales"
+                />
+              </div>
 
-            <div className="flex items-end">
-              <button
-                onClick={clearFilters}
-                className="w-full bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md"
-              >
-                Limpiar Filtros
-              </button>
+              <div className="flex items-end">
+                <button
+                  onClick={clearFilters}
+                  className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3 px-4 rounded-lg font-medium transition-colors"
+                >
+                  Limpiar Filtros
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Vehicles Grid */}
-      {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-500"></div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {vehicles.map((vehicle) => (
-            <div key={vehicle.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="h-48 bg-primary-200 flex items-center justify-center">
-                {vehicle.images && vehicle.images.length > 0 ? (
-                  <img
-                    src={vehicle.images[0]}
-                    alt={`${vehicle.brand} ${vehicle.model}`}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="text-primary-500 text-4xl">🚗</div>
-                )}
-              </div>
-
-              <div className="p-4">
-                <h3 className="text-lg font-semibold text-primary-900 mb-2">
-                  {vehicle.brand} {vehicle.model} {vehicle.year}
-                </h3>
-
-                <div className="space-y-1 text-sm text-primary-600 mb-4">
-                  <p>Precio: ${vehicle.price?.toLocaleString()}</p>
-                  <p>Kilometraje: {vehicle.mileage?.toLocaleString()} km</p>
-                  <p>Ubicación: {vehicle.location}</p>
+        {/* Vehicles Grid */}
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600"></div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {vehicles.map((vehicle) => (
+              <Link
+                key={vehicle.id}
+                to={`/vehicles/${vehicle.id}`}
+                className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden border border-gray-200"
+              >
+                <div className="relative">
+                  {vehicle.images && vehicle.images.length > 0 ? (
+                    <img
+                      src={vehicle.images[0]}
+                      alt={`${vehicle.brand} ${vehicle.model}`}
+                      className="w-full h-48 object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+                      <span className="text-gray-400 text-3xl">🚗</span>
+                    </div>
+                  )}
                 </div>
+                <div className="p-4">
+                  <h3 className="font-medium text-gray-900 mb-1 text-sm">
+                    {vehicle.brand} {vehicle.model} {vehicle.year}
+                  </h3>
+                  <p className="text-xl font-bold text-green-600 mb-2">
+                    ${vehicle.price?.toLocaleString()}
+                  </p>
+                  <div className="text-xs text-gray-600 space-y-1">
+                    <p>{vehicle.mileage?.toLocaleString()} km • {vehicle.location}</p>
+                    <p className="text-gray-500">{vehicle.transmission} • {vehicle.fuel_type}</p>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
 
-                <Link
-                  to={`/vehicle/${vehicle.id}`}
-                  className="block w-full bg-primary-600 hover:bg-primary-700 text-white text-center py-2 px-4 rounded-md transition duration-300"
-                >
-                  Ver Detalles
-                </Link>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {!loading && vehicles.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-primary-600 text-lg">No se encontraron vehículos con los filtros aplicados.</p>
-        </div>
-      )}
+        {!loading && vehicles.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-600">No se encontraron vehículos con los filtros aplicados.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

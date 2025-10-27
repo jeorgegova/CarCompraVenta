@@ -8,6 +8,7 @@ CREATE TABLE profiles (
   first_name TEXT,
   last_name TEXT,
   phone TEXT,
+  document_id TEXT,
   role TEXT DEFAULT 'buyer' CHECK (role IN ('buyer', 'seller', 'admin')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -180,47 +181,3 @@ CREATE POLICY "Users can view their own comparisons" ON vehicle_comparisons
 
 CREATE POLICY "Users can create and update their own comparisons" ON vehicle_comparisons
   FOR ALL USING (user_id = auth.uid());
-
--- Functions
-CREATE OR REPLACE FUNCTION handle_new_user()
-RETURNS TRIGGER AS $$
-BEGIN
-  INSERT INTO profiles (id, email, first_name, last_name, phone, role)
-  VALUES (
-    NEW.id,
-    NEW.email,
-    NEW.raw_user_meta_data->>'first_name',
-    NEW.raw_user_meta_data->>'last_name',
-    NEW.raw_user_meta_data->>'phone',
-    COALESCE(NEW.raw_user_meta_data->>'role', 'buyer')
-  );
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- Trigger to create profile on user signup
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION handle_new_user();
-
--- Function to update updated_at timestamp
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = NOW();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- Add updated_at triggers
-CREATE TRIGGER update_profiles_updated_at BEFORE UPDATE ON profiles
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_vehicles_updated_at BEFORE UPDATE ON vehicles
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_reservations_updated_at BEFORE UPDATE ON reservations
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_vehicle_comparisons_updated_at BEFORE UPDATE ON vehicle_comparisons
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

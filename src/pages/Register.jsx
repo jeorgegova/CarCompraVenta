@@ -10,6 +10,7 @@ const Register = () => {
     firstName: '',
     lastName: '',
     phone: '',
+    documentId: '',
     role: 'buyer', // buyer, seller, admin
   });
   const [loading, setLoading] = useState(false);
@@ -40,6 +41,7 @@ const Register = () => {
         first_name: formData.firstName,
         last_name: formData.lastName,
         phone: formData.phone,
+        document_id: formData.documentId,
         role: formData.role,
       };
 
@@ -53,154 +55,179 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-primary-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-primary-900">
-            Crear Cuenta
-          </h2>
-          <p className="mt-2 text-center text-sm text-primary-600">
-            ¿Ya tienes cuenta?{' '}
-            <Link
-              to="/login"
-              className="font-medium text-primary-600 hover:text-primary-500"
-            >
-              Inicia sesión aquí
-            </Link>
-          </p>
-        </div>
+    <div className="min-h-screen font-sans text-gray-900 bg-gray-50">
+      <div className="flex items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
+          <div className="text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Crear Cuenta
+            </h2>
+            <p className="text-lg text-gray-600 mb-8">
+              Únete a nuestra plataforma de vehículos
+            </p>
+          </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-              {error}
-            </div>
-          )}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                  {error}
+                </div>
+              )}
 
-          <div className="rounded-md shadow-sm space-y-4">
-            <div>
-              <label htmlFor="firstName" className="block text-sm font-medium text-primary-700">
-                Nombre
-              </label>
-              <input
-                id="firstName"
-                name="firstName"
-                type="text"
-                required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-primary-300 placeholder-primary-500 text-primary-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                placeholder="Tu nombre"
-                value={formData.firstName}
-                onChange={handleChange}
-              />
-            </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Nombre
+                  </label>
+                  <input
+                    type="text"
+                    name="firstName"
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
+                    placeholder="Tu nombre"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Apellido
+                  </label>
+                  <input
+                    type="text"
+                    name="lastName"
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
+                    placeholder="Tu apellido"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
 
-            <div>
-              <label htmlFor="lastName" className="block text-sm font-medium text-primary-700">
-                Apellido
-              </label>
-              <input
-                id="lastName"
-                name="lastName"
-                type="text"
-                required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-primary-300 placeholder-primary-500 text-primary-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                placeholder="Tu apellido"
-                value={formData.lastName}
-                onChange={handleChange}
-              />
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Teléfono
+                </label>
+                <input
+                  type="tel"
+                  name="phone"
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
+                  placeholder="Tu teléfono"
+                  value={formData.phone}
+                  onChange={handleChange}
+                />
+              </div>
 
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-primary-700">
-                Teléfono
-              </label>
-              <input
-                id="phone"
-                name="phone"
-                type="tel"
-                required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-primary-300 placeholder-primary-500 text-primary-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                placeholder="Tu teléfono"
-                value={formData.phone}
-                onChange={handleChange}
-              />
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Documento de Identidad
+                </label>
+                <input
+                  type="text"
+                  name="documentId"
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
+                  placeholder="Tu documento de identidad"
+                  value={formData.documentId}
+                  onChange={handleChange}
+                />
+              </div>
 
-            <div>
-              <label htmlFor="role" className="block text-sm font-medium text-primary-700">
-                Tipo de cuenta
-              </label>
-              <select
-                id="role"
-                name="role"
-                className="mt-1 block w-full px-3 py-2 border border-primary-300 bg-white text-primary-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                value={formData.role}
-                onChange={handleChange}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tipo de cuenta
+                </label>
+                <select
+                  name="role"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
+                  value={formData.role}
+                  onChange={handleChange}
+                >
+                  <option value="buyer">Comprador</option>
+                  <option value="seller">Vendedor</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Correo electrónico
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
+                  placeholder="tu@email.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Contraseña
+                </label>
+                <input
+                  type="password"
+                  name="password"
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
+                  placeholder="Tu contraseña"
+                  value={formData.password}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Confirmar contraseña
+                </label>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
+                  placeholder="Confirma tu contraseña"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-gray-900 text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                <option value="buyer">Comprador</option>
-                <option value="seller">Vendedor</option>
-              </select>
-            </div>
+                {loading ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Creando cuenta...
+                  </span>
+                ) : (
+                  'Crear Cuenta'
+                )}
+              </button>
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-primary-700">
-                Correo electrónico
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-primary-300 placeholder-primary-500 text-primary-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                placeholder="tu@email.com"
-                value={formData.email}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-primary-700">
-                Contraseña
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-primary-300 placeholder-primary-500 text-primary-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                placeholder="Tu contraseña"
-                value={formData.password}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-primary-700">
-                Confirmar contraseña
-              </label>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-primary-300 placeholder-primary-500 text-primary-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                placeholder="Confirma tu contraseña"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-              />
-            </div>
+              <div className="text-center">
+                <p className="text-gray-600 text-sm">
+                  ¿Ya tienes cuenta?{' '}
+                  <Link
+                    to="/login"
+                    className="font-medium text-gray-900 hover:text-gray-700 transition-colors"
+                  >
+                    Inicia sesión aquí
+                  </Link>
+                </p>
+              </div>
+            </form>
           </div>
-
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
-            >
-              {loading ? 'Creando cuenta...' : 'Crear Cuenta'}
-            </button>
-          </div>
-        </form>
+        </div>
       </div>
     </div>
   );

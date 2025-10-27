@@ -1,91 +1,105 @@
-import { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
+import { createContext, useContext, useEffect, useState } from 'react'
+import { supabase } from '../lib/supabase'
 
-const AuthContext = createContext({});
+const AuthContext = createContext()
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+export const useAuth = () => useContext(AuthContext)
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [notification, setNotification] = useState(null)
 
   useEffect(() => {
-    // Get initial session
-    const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-      setLoading(false);
-    };
+    let mounted = true
 
-    getSession();
+    const initAuth = async () => {
+      // 1️⃣ Intentar cargar sesión inicial
+      const {
+        data: { session },
+        error
+      } = await supabase.auth.getSession()
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
+      if (error) console.error('Error obteniendo sesión:', error)
+      if (!mounted) return
 
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const signUp = async (email, password, userData) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-
-    if (error) throw error;
-
-    // Create user profile
-    if (data.user) {
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: data.user.id,
-          email: data.user.email,
-          ...userData,
-        });
-
-      if (profileError) throw profileError;
+      setUser(session?.user ?? null)
+      setLoading(false)
     }
 
-    return data;
-  };
+    initAuth()
 
+    // 2️⃣ Escuchar cambios de sesión en tiempo real
+    const {
+      data: { subscription }
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return
+      setUser(session?.user ?? null)
+      setLoading(false)
+    })
+
+    // 3️⃣ Limpieza al desmontar
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
+    }
+  }, [])
+
+  // 🔹 Iniciar sesión
   const signIn = async (email, password) => {
+    setLoading(true)
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
-      password,
-    });
+      password
+    })
+    if (error) {
+      setLoading(false)
+      throw error
+    }
+    setUser(data.user)
+    setLoading(false)
+    return data
+  }
 
-    if (error) throw error;
-    return data;
-  };
+  // 🔹 Registrar usuario
+  const signUp = async (email, password, extraData = {}) => {
+    const { data, error } = await supabase.auth.signUp({ email, password })
+    if (error) throw error
 
+    if (data.user) {
+      await supabase.from('profiles').insert({
+        id: data.user.id,
+        email: data.user.email,
+        ...extraData,
+        created_at: new Date().toISOString(),
+      })
+    }
+
+    return data
+  }
+
+  // 🔹 Cerrar sesión
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
-  };
+    await supabase.auth.signOut()
+    setUser(null)
+  }
 
-  const value = {
-    user,
-    loading,
-    signUp,
-    signIn,
-    signOut,
-  };
+  // 🔹 Notificaciones simples
+  const clearNotification = () => setNotification(null)
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        signIn,
+        signUp,
+        signOut,
+        notification,
+        clearNotification
+      }}
+    >
       {children}
     </AuthContext.Provider>
-  );
-};
+  )
+}

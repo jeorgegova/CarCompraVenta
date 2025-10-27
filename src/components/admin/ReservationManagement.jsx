@@ -43,7 +43,7 @@ const ReservationManagement = () => {
     try {
       const { error } = await supabase
         .from('reservations')
-        .update({ status: newStatus })
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
         .eq('id', reservationId);
 
       if (error) throw error;
