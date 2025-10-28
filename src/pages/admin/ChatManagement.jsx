@@ -49,7 +49,7 @@ const ChatManagement = () => {
       data.forEach(message => {
         const otherUserId = message.sender_id === user.id ? message.receiver_id : message.sender_id;
         const vehicleId = message.vehicle_id;
-        const key = `${vehicleId}-${otherUserId}`;
+        const key = `${vehicleId}|${otherUserId}`;
 
         if (!conversationMap.has(key)) {
           const otherUser = message.sender_id === user.id ? message.receiver : message.sender;
@@ -85,7 +85,7 @@ const ChatManagement = () => {
   };
 
   const fetchMessages = async (conversationId) => {
-    const [vehicleId, receiverId] = conversationId.split('-');
+    const [vehicleId, receiverId] = conversationId.split('|');
 
     try {
       const { data, error } = await supabase
@@ -111,7 +111,7 @@ const ChatManagement = () => {
     if (!newMessage.trim() || !selectedConversation) return;
 
     setSending(true);
-    const [vehicleId, receiverId] = selectedConversation.id.split('-');
+    const [vehicleId, receiverId] = selectedConversation.id.split('|');
 
     try {
       const { error } = await supabase
@@ -139,7 +139,7 @@ const ChatManagement = () => {
   };
 
   const markAsRead = async (conversationId) => {
-    const [vehicleId, senderId] = conversationId.split('-');
+    const [vehicleId, senderId] = conversationId.split('|');
 
     try {
       const { error } = await supabase

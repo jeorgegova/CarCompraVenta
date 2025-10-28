@@ -39,12 +39,20 @@ const Navbar = () => {
                 vehicle:vehicles(brand, model, year)
               `)
               .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
-              .order('created_at', { ascending: false })
-              .limit(10);
+              .order('created_at', { ascending: false });
 
             if (!messagesError) {
-              setNotifications(messages || []);
-              const unreadCount = messages?.filter(msg => msg.receiver_id === user.id && !msg.is_read).length || 0;
+              // Group messages by vehicle_id, keeping only the latest message per vehicle
+              const vehicleMap = new Map();
+              messages?.forEach(message => {
+                if (!vehicleMap.has(message.vehicle_id)) {
+                  vehicleMap.set(message.vehicle_id, message);
+                }
+              });
+              const groupedNotifications = Array.from(vehicleMap.values()).slice(0, 5); // Limit to 5 vehicles
+
+              setNotifications(groupedNotifications);
+              const unreadCount = groupedNotifications.filter(msg => msg.receiver_id === user.id && !msg.is_read).length;
               setUnreadNotifications(unreadCount);
             }
           }
@@ -70,11 +78,12 @@ const Navbar = () => {
   };
 
   const handleNotificationClick = async (notification) => {
-    // Mark as read
+    // Mark all messages for this vehicle as read
     await supabase
       .from('messages')
       .update({ is_read: true })
-      .eq('id', notification.id);
+      .eq('vehicle_id', notification.vehicle_id)
+      .eq('receiver_id', user.id);
 
     // Refresh notifications
     const { data: messages } = await supabase
@@ -86,11 +95,19 @@ const Navbar = () => {
         vehicle:vehicles(brand, model, year)
       `)
       .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
-      .order('created_at', { ascending: false })
-      .limit(10);
+      .order('created_at', { ascending: false });
 
-    setNotifications(messages || []);
-    setUnreadNotifications(messages?.filter(msg => !msg.is_read).length || 0);
+    // Group messages by vehicle_id again
+    const vehicleMap = new Map();
+    messages?.forEach(message => {
+      if (!vehicleMap.has(message.vehicle_id)) {
+        vehicleMap.set(message.vehicle_id, message);
+      }
+    });
+    const groupedNotifications = Array.from(vehicleMap.values()).slice(0, 5);
+
+    setNotifications(groupedNotifications);
+    setUnreadNotifications(groupedNotifications.filter(msg => msg.receiver_id === user.id && !msg.is_read).length);
     setShowNotifications(false);
 
     // Navigate to chats page
@@ -154,9 +171,9 @@ const Navbar = () => {
                                 No tienes mensajes
                               </div>
                             ) : (
-                              notifications.slice(0, 5).map((notification) => (
+                              notifications.map((notification) => (
                                 <div
-                                  key={notification.id}
+                                  key={notification.vehicle_id}
                                   className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${!notification.is_read ? 'bg-blue-50' : ''}`}
                                   onClick={() => handleNotificationClick(notification)}
                                 >
@@ -169,7 +186,7 @@ const Navbar = () => {
                                         }
                                       </p>
                                       <p className="text-sm text-gray-600 truncate">
-                                        {notification.vehicle ? `${notification.vehicle.brand} ${notification.vehicle.model}` : 'Mensaje general'}
+                                        {notification.vehicle ? `${notification.vehicle.brand} ${notification.vehicle.model} ${notification.vehicle.year}` : 'Mensaje general'}
                                       </p>
                                       <p className="text-xs text-gray-500 mt-1">
                                         {new Date(notification.created_at).toLocaleDateString('es-ES')}
@@ -185,17 +202,15 @@ const Navbar = () => {
                               ))
                             )}
                           </div>
-                          {notifications.length > 5 && (
-                            <div className="p-3 border-t border-gray-200 text-center">
-                              <Link
-                                to="/chats"
-                                className="text-sm text-gray-600 hover:text-gray-900"
-                                onClick={() => setShowNotifications(false)}
-                              >
-                                Ver todos los mensajes
-                              </Link>
-                            </div>
-                          )}
+                          <div className="p-3 border-t border-gray-200 text-center">
+                            <Link
+                              to="/chats"
+                              className="text-sm text-gray-600 hover:text-gray-900"
+                              onClick={() => setShowNotifications(false)}
+                            >
+                              Ver todas las conversaciones
+                            </Link>
+                          </div>
                         </div>
                       )}
                     </div>

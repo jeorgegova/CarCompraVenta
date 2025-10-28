@@ -9,6 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [notification, setNotification] = useState(null)
+  const [welcomeShown, setWelcomeShown] = useState(false)
 
   useEffect(() => {
     let mounted = true
@@ -32,10 +33,34 @@ export const AuthProvider = ({ children }) => {
     // 2️⃣ Escuchar cambios de sesión en tiempo real
     const {
       data: { subscription }
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!mounted) return
       setUser(session?.user ?? null)
       setLoading(false)
+
+      // Show welcome notification on sign in
+      if (session?.user && !welcomeShown) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('first_name, last_name')
+          .eq('id', session.user.id)
+          .single()
+
+        if (profile) {
+          const fullName = `${profile.first_name} ${profile.last_name}`.trim()
+          setNotification({
+            message: `¡Bienvenido de vuelta, ${fullName}!`,
+            type: 'success',
+            duration: 5000
+          })
+          setWelcomeShown(true)
+        }
+      }
+
+      // Reset welcome flag on sign out
+      if (!session?.user) {
+        setWelcomeShown(false)
+      }
     })
 
     // 3️⃣ Limpieza al desmontar
@@ -87,6 +112,15 @@ export const AuthProvider = ({ children }) => {
   // 🔹 Notificaciones simples
   const clearNotification = () => setNotification(null)
 
+  // 🔹 Mostrar notificación de bienvenida
+  const showWelcomeNotification = (name) => {
+    setNotification({
+      message: `¡Bienvenido, ${name}!`,
+      type: 'success',
+      duration: 5000
+    })
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -96,7 +130,8 @@ export const AuthProvider = ({ children }) => {
         signUp,
         signOut,
         notification,
-        clearNotification
+        clearNotification,
+        showWelcomeNotification
       }}
     >
       {children}

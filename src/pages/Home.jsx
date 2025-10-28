@@ -148,135 +148,148 @@ const Home = () => {
     {
       title: "Registro de Vehículos",
       description: "Registro completo de vehículos nuevos y usados con toda la documentación requerida.",
-      icon: "📄",
+      image: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=400&h=300&fit=crop&auto=format",
       details: ["Registro inicial", "Actualización de datos", "Certificación de propiedad"]
     },
     {
       title: "Transferencia de Propiedad",
       description: "Transferencia rápida y segura de propiedad con verificación completa de documentos.",
-      icon: "🔄",
+      image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=300&fit=crop&auto=format",
       details: ["Verificación de documentos", "Tramite ante tránsito", "Entrega inmediata"]
     },
     {
       title: "SOAT y Seguros",
       description: "Renovación y expedición de SOAT con las mejores aseguradoras del mercado.",
-      icon: "📋",
+      image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=400&h=300&fit=crop&auto=format",
       details: ["Cotización automática", "Pago en línea", "Entrega digital"]
     },
     {
       title: "Licencias de Conducir",
       description: "Expedición de licencias de conducción para todo tipo de vehículo.",
-      icon: "🚦",
+      image: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop&auto=format",
       details: ["Examen teórico", "Examen práctico", "Licencias especiales"]
     },
     {
       title: "Revisión Técnico Mecánica",
       description: "Revisión técnico mecánica completa en centros autorizados.",
-      icon: "🔧",
+      image: "https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=400&h=300&fit=crop&auto=format",
       details: ["Inspección visual", "Pruebas de emisiones", "Certificación oficial"]
     },
     {
       title: "Trámites de Importación",
       description: "Asesoría completa para importación de vehículos desde el exterior.",
-      icon: "✈️",
+      image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop&auto=format",
       details: ["Documentación aduanera", "Homologación", "Registro nacional"]
     }
   ];
 
+  // Auto-slide functionality
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % services.length);
+    }, 4000); // Change slide every 4 seconds
+
+    return () => clearInterval(interval);
+  }, [services.length]);
+
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % Math.ceil(services.length / 3));
+    setCurrentSlide((prev) => (prev + 1) % services.length);
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + Math.ceil(services.length / 3)) % Math.ceil(services.length / 3));
+    setCurrentSlide((prev) => (prev - 1 + services.length) % services.length);
   };
 
   return (
     <div className="min-h-screen font-sans text-gray-900 bg-gray-50">
 
       {/* Services Carousel Section */}
-      <section className="bg-white py-16 border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Nuestros Servicios de Tránsito
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Te ayudamos con todos los trámites necesarios para tu vehículo en Manizales y toda Colombia
-            </p>
-          </div>
+      <section className="relative h-96 flex items-center border-b border-gray-200 overflow-hidden">
+        {/* Background Image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-1000 ease-in-out"
+          style={{
+            backgroundImage: `url('${services[currentSlide].image}')`
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-black/60"></div>
+          <div className="absolute inset-0 backdrop-blur-[1px]"></div>
+        </div>
 
-          {/* Services Carousel */}
-          <div className="relative">
-            <div className="overflow-hidden">
-              <div
-                className="flex transition-transform duration-500 ease-in-out"
-                style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-              >
-                {Array.from({ length: Math.ceil(services.length / 3) }, (_, slideIndex) => (
-                  <div key={slideIndex} className="w-full flex-shrink-0">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-4">
-                      {services.slice(slideIndex * 3, (slideIndex + 1) * 3).map((service, index) => (
-                        <div
-                          key={index}
-                          className="bg-gray-50 rounded-xl p-6 hover:shadow-lg transition-shadow duration-300 border border-gray-200"
-                        >
-                          <div className="text-center mb-4">
-                            <div className="text-5xl mb-3">{service.icon}</div>
-                            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                              {service.title}
-                            </h3>
-                            <p className="text-gray-600 text-sm leading-relaxed">
-                              {service.description}
-                            </p>
-                          </div>
-                          <ul className="space-y-2">
-                            {service.details.map((detail, detailIndex) => (
-                              <li key={detailIndex} className="flex items-center text-sm text-gray-700">
-                                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full mr-3 flex-shrink-0"></span>
-                                {detail}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
+        {/* Content Overlay */}
+        <div className="relative z-10 w-full">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-3 drop-shadow-lg">
+                Nuestros Servicios de Tránsito
+              </h2>
+              <p className="text-lg text-white/90 max-w-2xl mx-auto drop-shadow-md">
+                Te ayudamos con todos los trámites necesarios para tu vehículo en Manizales y toda Colombia
+              </p>
             </div>
 
-            {/* Navigation Buttons */}
-            <button
-              onClick={prevSlide}
-              className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white shadow-lg rounded-full p-3 hover:bg-gray-50 transition-colors duration-200 border border-gray-200"
-              style={{ left: '-20px' }}
-            >
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <button
-              onClick={nextSlide}
-              className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white shadow-lg rounded-full p-3 hover:bg-gray-50 transition-colors duration-200 border border-gray-200"
-              style={{ right: '-20px' }}
-            >
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
+            {/* Services Carousel - One item per slide */}
+            <div className="relative">
+              <div className="overflow-hidden">
+                <div
+                  className="flex transition-transform duration-1000 ease-in-out"
+                  style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+                >
+                  {services.map((service, index) => (
+                    <div key={index} className="w-full flex-shrink-0 flex justify-center items-center">
+                      <div className="max-w-3xl mx-auto text-center px-4">
+                        <h3 className="text-4xl md:text-5xl font-bold text-white mb-6 drop-shadow-2xl">
+                          {service.title}
+                        </h3>
+                        <p className="text-white/95 text-xl md:text-2xl leading-relaxed mb-8 drop-shadow-lg max-w-2xl mx-auto">
+                          {service.description}
+                        </p>
+                        <ul className="space-y-4">
+                          {service.details.map((detail, detailIndex) => (
+                            <li key={detailIndex} className="flex items-center justify-center text-white/90 drop-shadow-md">
+                              <span className="w-2 h-2 bg-white/80 rounded-full mr-4 flex-shrink-0 animate-pulse"></span>
+                              <span className="text-lg md:text-xl">{detail}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
-            {/* Indicators */}
-            <div className="flex justify-center mt-8 space-x-2">
-              {Array.from({ length: Math.ceil(services.length / 3) }, (_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentSlide(index)}
-                  className={`w-3 h-3 rounded-full transition-colors duration-200 ${
-                    index === currentSlide ? 'bg-gray-800' : 'bg-gray-300'
-                  }`}
-                />
-              ))}
+              {/* Navigation Buttons */}
+              <button
+                onClick={prevSlide}
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/20 backdrop-blur-md shadow-2xl rounded-full p-3 hover:bg-white/30 hover:scale-110 transition-all duration-300 border border-white/30 group"
+              >
+                <svg className="w-6 h-6 text-white group-hover:text-blue-200 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button
+                onClick={nextSlide}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/20 backdrop-blur-md shadow-2xl rounded-full p-3 hover:bg-white/30 hover:scale-110 transition-all duration-300 border border-white/30 group"
+              >
+                <svg className="w-6 h-6 text-white group-hover:text-blue-200 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+
+              {/* Indicators */}
+              <div className="flex justify-center mt-6 space-x-3">
+                {services.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`w-3 h-3 rounded-full transition-all duration-500 ${
+                      index === currentSlide
+                        ? 'bg-white scale-125 shadow-lg animate-pulse'
+                        : 'bg-white/50 hover:bg-white/70 hover:scale-110'
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </div>

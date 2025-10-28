@@ -23,7 +23,8 @@ const BuyerChats = () => {
 
   useEffect(() => {
     if (selectedConversation) {
-      fetchMessages(selectedConversation.id);
+      const [vehicleId, receiverId] = selectedConversation.id.split('|');
+      fetchMessages(vehicleId, receiverId);
     }
   }, [selectedConversation]);
 
@@ -55,7 +56,7 @@ const BuyerChats = () => {
       data.forEach(message => {
         const otherUserId = message.sender_id === user.id ? message.receiver_id : message.sender_id;
         const vehicleId = message.vehicle_id;
-        const key = `${vehicleId}-${otherUserId}`;
+        const key = `${vehicleId}|${otherUserId}`;
 
         if (!conversationMap.has(key)) {
           const otherUser = message.sender_id === user.id ? message.receiver : message.sender;
@@ -90,9 +91,7 @@ const BuyerChats = () => {
     }
   };
 
-  const fetchMessages = async (conversationId) => {
-    const [vehicleId, receiverId] = conversationId.split('-');
-
+  const fetchMessages = async (vehicleId, receiverId) => {
     try {
       const { data, error } = await supabase
         .from('messages')
@@ -117,7 +116,7 @@ const BuyerChats = () => {
     if (!newMessage.trim() || !selectedConversation) return;
 
     setSending(true);
-    const [vehicleId, receiverId] = selectedConversation.id.split('-');
+    const [vehicleId, receiverId] = selectedConversation.id.split('|');
 
     try {
       const { error } = await supabase
@@ -134,7 +133,7 @@ const BuyerChats = () => {
       if (error) throw error;
 
       setNewMessage('');
-      await fetchMessages(selectedConversation.id);
+      await fetchMessages(vehicleId, receiverId);
       await fetchConversations(); // Refresh conversation list
     } catch (error) {
       console.error('Error sending message:', error);
@@ -152,7 +151,7 @@ const BuyerChats = () => {
   };
 
   const markAsRead = async (conversationId) => {
-    const [vehicleId, senderId] = conversationId.split('-');
+    const [vehicleId, senderId] = conversationId.split('|');
 
     try {
       const { error } = await supabase
