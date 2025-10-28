@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
 const Home = () => {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const scrollContainerRef = useRef(null);
+  const [isPaused, setIsPaused] = useState(false);
   const [filterOptions, setFilterOptions] = useState({
     brands: [],
     locations: [],
@@ -148,40 +150,64 @@ const Home = () => {
     {
       title: "Registro de Vehículos",
       description: "Registro completo de vehículos nuevos y usados con toda la documentación requerida.",
-      image: "https://images.unsplash.com/photo-1563720223485-82d4e131a137?w=1200&h=600&fit=crop&auto=format&q=80",
-      details: ["Registro inicial", "Actualización de datos", "Certificación de propiedad"]
+      image: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1200&h=600&fit=crop&auto=format&q=80",
+      details: ["Registro inicial", "Actualización de datos", "Certificación de propiedad"],
     },
     {
       title: "Transferencia de Propiedad",
       description: "Transferencia rápida y segura de propiedad con verificación completa de documentos.",
-      image: "https://images.unsplash.com/photo-1544829099-b9a0c07fad1a?w=1200&h=600&fit=crop&auto=format&q=80",
-      details: ["Verificación de documentos", "Tramite ante tránsito", "Entrega inmediata"]
+      image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=1200&h=600&fit=crop&auto=format&q=80",
+      details: ["Verificación de documentos", "Tramite ante tránsito", "Entrega inmediata"],
     },
     {
       title: "SOAT y Seguros",
       description: "Renovación y expedición de SOAT con las mejores aseguradoras del mercado.",
-      image: "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=1200&h=600&fit=crop&auto=format&q=80",
-      details: ["Cotización automática", "Pago en línea", "Entrega digital"]
+      image: "https://images.unsplash.com/photo-1485291571150-772bcfc10da5?w=1200&h=600&fit=crop&auto=format&q=80",
+      details: ["Cotización automática", "Pago en línea", "Entrega digital"],
     },
     {
       title: "Licencias de Conducir",
       description: "Expedición de licencias de conducción para todo tipo de vehículo.",
-      image: "https://images.unsplash.com/photo-1563720223485-82d4e131a137?w=1200&h=600&fit=crop&auto=format&q=80",
-      details: ["Examen teórico", "Examen práctico", "Licencias especiales"]
+      image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&h=600&fit=crop&auto=format&q=80",
+      details: ["Examen teórico", "Examen práctico", "Licencias especiales"],
     },
     {
       title: "Revisión Técnico Mecánica",
       description: "Revisión técnico mecánica completa en centros autorizados.",
-      image: "https://images.unsplash.com/photo-1544829099-b9a0c07fad1a?w=1200&h=600&fit=crop&auto=format&q=80",
-      details: ["Inspección visual", "Pruebas de emisiones", "Certificación oficial"]
+      image: "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=1200&h=600&fit=crop&auto=format&q=80",
+      details: ["Inspección visual", "Pruebas de emisiones", "Certificación oficial"],
     },
     {
       title: "Trámites de Importación",
       description: "Asesoría completa para importación de vehículos desde el exterior.",
-      image: "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=1200&h=600&fit=crop&auto=format&q=80",
-      details: ["Documentación aduanera", "Homologación", "Registro nacional"]
-    }
-  ];
+      image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&h=600&fit=crop&auto=format&q=80",
+      details: ["Documentación aduanera", "Homologación", "Registro nacional"],
+    },
+  ]
+
+  const testimonials = [
+  {
+    name: "Carlos Ramírez",
+    role: "Comprador de Vehículo",
+    product: "car-purchase",
+    image: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=400&h=400&fit=crop&auto=format&q=80",
+    text: "Compré mi auto usado con total confianza. El proceso fue transparente y me ayudaron con toda la documentación.",
+  },
+  {
+    name: "Laura Martínez",
+    role: "Vendedora de Auto",
+    product: "car-sale",
+    image: "https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=400&h=400&fit=crop&auto=format&q=80",
+    text: "Vendí mi carro en tiempo récord. La plataforma me conectó con compradores serios y el pago fue seguro.",
+  },
+  {
+    name: "Roberto Silva",
+    role: "Cliente de Traspaso",
+    product: "transit-service",
+    image: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=400&h=400&fit=crop&auto=format&q=80",
+    text: "El servicio de traspaso fue excelente. Se encargaron de todo el papeleo y lo resolvieron en días.",
+  },
+]
 
   // Auto-slide functionality
   useEffect(() => {
@@ -192,6 +218,7 @@ const Home = () => {
     return () => clearInterval(interval);
   }, [services.length]);
 
+
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % services.length);
   };
@@ -201,101 +228,104 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen font-sans text-gray-900 bg-gray-50">
+    <div className="min-h-screen font-sans text-gray-900 bg-gray-100">
 
       {/* Modern Services Carousel Section */}
-      <section className="relative h-80 flex items-center border-b border-gray-200/50 overflow-hidden bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
-        {/* Animated Background */}
+      <section className="relative h-[350px] flex items-center overflow-hidden bg-gray-100">
+        {/* Fondo animado */}
         <div className="absolute inset-0 overflow-hidden">
           <div
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-700 ease-out transform scale-105"
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-1000 ease-out transform scale-105"
             style={{
-              backgroundImage: `url('${services[currentSlide].image}')`
+              backgroundImage: `url('${services[currentSlide].image}')`,
+              filter: 'grayscale(60%) contrast(1) brightness(1)'
             }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/70"></div>
-            <div className="absolute inset-0 backdrop-blur-sm"></div>
-          </div>
-          
-          {/* Animated particles */}
-          <div className="absolute inset-0 opacity-20">
-            <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-white rounded-full animate-pulse"></div>
-            <div className="absolute top-1/3 right-1/4 w-1 h-1 bg-blue-300 rounded-full animate-bounce"></div>
-            <div className="absolute bottom-1/4 left-1/3 w-1 h-1 bg-purple-300 rounded-full animate-ping"></div>
-          </div>
+          ></div>
+
+          {/* 🔹 Capa de difuminado general sobre el fondo */}
+          <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-white via-gray-50/30 to-transparent"></div>
         </div>
 
-        {/* Content Overlay */}
+        {/* Contenido principal con blur suave */}
         <div className="relative z-10 w-full">
-          <div className="max-w-6xl mx-auto px-4">
-            <div className="text-center mb-6">
-              <h2 className="text-2xl md:text-3xl font-bold text-white mb-2 drop-shadow-xl bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent">
-                Nuestros Servicios de Tránsito
-              </h2>
-              <p className="text-sm md:text-base text-white/80 max-w-xl mx-auto drop-shadow-md">
-                Te ayudamos con todos los trámites necesarios para tu vehículo en Manizales y toda Colombia
-              </p>
-            </div>
-
-            {/* Modern Carousel */}
+          <div className="max-w-5xl mx-auto px-4">
             <div className="relative">
-              <div className="overflow-hidden rounded-2xl bg-white/5 backdrop-blur-md border border-white/10">
+              {/* 🔹 Cuadro principal con efecto “vidrio difuminado” */}
+              <div className="backdrop-blur-md bg-white/25 rounded-2xl border border-white/30 shadow-2xl overflow-hidden">
                 <div
                   className="flex transition-transform duration-1000 ease-in-out"
                   style={{ transform: `translateX(-${currentSlide * 100}%)` }}
                 >
                   {services.map((service, index) => (
-                    <div key={index} className="w-full flex-shrink-0 flex justify-center items-center p-6">
-                      <div className="max-w-2xl mx-auto text-center px-4">
-                        <h3 className="text-2xl md:text-3xl font-bold text-white mb-4 drop-shadow-2xl">
+                    <div key={index} className="w-full flex-shrink-0 p-5">
+                      <div className="text-center">
+                        {/* Icono */}
+                        <div className="inline-flex items-center justify-center w-11 h-11 rounded-xl bg-white/25 backdrop-blur-sm border border-white/30 mb-3">
+                          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                          </svg>
+                        </div>
+
+                        {/* Título */}
+                        <h3 className="text-lg md:text-2xl font-bold text-white mb-2 drop-shadow-md">
                           {service.title}
                         </h3>
-                        <p className="text-white/90 text-base md:text-lg leading-relaxed mb-6 drop-shadow-lg max-w-lg mx-auto">
+
+                        {/* Descripción */}
+                        <p className="text-gray-100 text-xs md:text-sm leading-relaxed mb-4 max-w-md mx-auto opacity-90">
                           {service.description}
                         </p>
-                        <ul className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                          {service.details.map((detail, detailIndex) => (
-                            <li key={detailIndex} className="flex items-center justify-center text-white/80 text-sm drop-shadow-md bg-white/5 rounded-lg px-3 py-2 backdrop-blur-sm border border-white/10">
-                              <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2 flex-shrink-0 animate-pulse"></span>
-                              <span>{detail}</span>
-                            </li>
+
+                        {/* Detalles */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                          {service.details.map((detail, i) => (
+                            <div
+                              key={i}
+                              className="flex items-center justify-center gap-2 text-gray-100 text-xs font-medium bg-white/15 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-white/20 hover:bg-white/25 transition-all duration-300"
+                            >
+                              <span className="w-1 h-1 bg-gray-300 rounded-full animate-pulse"></span>
+                              {detail}
+                            </div>
                           ))}
-                        </ul>
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Modern Navigation Buttons */}
+              {/* Botones de navegación */}
               <button
                 onClick={prevSlide}
-                className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/10 backdrop-blur-lg shadow-2xl rounded-full p-2 hover:bg-white/20 hover:scale-110 transition-all duration-300 border border-white/20 group"
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center hover:bg-white/30 hover:scale-110 transition-all duration-300"
+                aria-label="Anterior"
               >
-                <svg className="w-5 h-5 text-white group-hover:text-blue-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <button
-                onClick={nextSlide}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/10 backdrop-blur-lg shadow-2xl rounded-full p-2 hover:bg-white/20 hover:scale-110 transition-all duration-300 border border-white/20 group"
-              >
-                <svg className="w-5 h-5 text-white group-hover:text-blue-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
 
-              {/* Modern Indicators */}
-              <div className="flex justify-center mt-4 space-x-2">
+              <button
+                onClick={nextSlide}
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center hover:bg-white/30 hover:scale-110 transition-all duration-300"
+                aria-label="Siguiente"
+              >
+                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+
+              {/* Indicadores */}
+              <div className="flex justify-center gap-1.5 mt-4">
                 {services.map((_, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentSlide(index)}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                      index === currentSlide
-                        ? 'bg-blue-400 scale-125 shadow-lg ring-2 ring-white/50'
-                        : 'bg-white/30 hover:bg-white/50 hover:scale-110'
-                    }`}
+                    className={`transition-all duration-300 ${index === currentSlide
+                      ? 'w-7 h-1.5 bg-white rounded-full shadow-md'
+                      : 'w-1.5 h-1.5 bg-white/50 rounded-full hover:bg-white/80 hover:scale-125'
+                      }`}
+                    aria-label={`Ir a slide ${index + 1}`}
                   />
                 ))}
               </div>
@@ -307,7 +337,7 @@ const Home = () => {
       {/* Main Content with Sidebar Filters */}
       <section className="py-8 bg-gray-100">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex flex-col lg:flex-row gap-8">
+          <div className="flex flex-col lg:flex-row gap-8 lg:justify-start">
             {/* Sidebar Filters */}
             <aside className="lg:w-80 flex-shrink-0">
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -380,7 +410,7 @@ const Home = () => {
                     name="brand_dropdown"
                     value={filters.brand_dropdown || ''}
                     onChange={(e) => {
-                      setFilters({...filters, brand_dropdown: e.target.value, brand: e.target.value});
+                      setFilters({ ...filters, brand_dropdown: e.target.value, brand: e.target.value });
                     }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-500 text-sm"
                   >
@@ -404,9 +434,9 @@ const Home = () => {
                             onChange={() => {
                               // For simplicity, we'll toggle year ranges
                               if (filters.year_min === year && filters.year_max === year) {
-                                setFilters({...filters, year_min: '', year_max: ''});
+                                setFilters({ ...filters, year_min: '', year_max: '' });
                               } else {
-                                setFilters({...filters, year_min: year, year_max: year});
+                                setFilters({ ...filters, year_min: year, year_max: year });
                               }
                             }}
                             className="text-gray-600 focus:ring-gray-500"
@@ -640,34 +670,113 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Categories/Quick Links */}
-      <section className="py-8 bg-white border-t border-gray-200">
-        <div className="max-w-7xl mx-auto px-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Buscar por tipo</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <button className="p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors text-left">
-              <div className="text-2xl mb-2">🚗</div>
-              <div className="font-medium text-gray-900">Autos</div>
-              <div className="text-sm text-gray-600">Sedanes y hatchbacks</div>
-            </button>
-            <button className="p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors text-left">
-              <div className="text-2xl mb-2">🚙</div>
-              <div className="font-medium text-gray-900">SUVs</div>
-              <div className="text-sm text-gray-600">Todo terreno</div>
-            </button>
-            <button className="p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors text-left">
-              <div className="text-2xl mb-2">🏍️</div>
-              <div className="font-medium text-gray-900">Motos</div>
-              <div className="text-sm text-gray-600">Deportivas y urbanas</div>
-            </button>
-            <button className="p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors text-left">
-              <div className="text-2xl mb-2">🚛</div>
-              <div className="font-medium text-gray-900">Camiones</div>
-              <div className="text-sm text-gray-600">Carga y trabajo</div>
-            </button>
+      {/* Testimonials Section */}
+      <section className="py-12 bg-gray-50">
+        <div className="w-full px-4">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">Testimonios de Clientes</h2>
+            <p className="text-base text-gray-600">Lo que dicen nuestros clientes</p>
+          </div>
+
+          <div className="relative overflow-hidden">
+            <style>{`
+              @keyframes scroll {
+                0% { transform: translateX(0); }
+                100% { transform: translateX(-50%); }
+              }
+              .animate-scroll {
+                animation: scroll 15s linear infinite;
+              }
+            `}</style>
+            <div className="flex gap-6 animate-scroll">
+              {[...testimonials, ...testimonials].map((testimonial, index) => (
+                <div key={index} className="group relative flex-shrink-0 w-[500px]">
+                  <div className="flex items-center gap-4">
+                    {/* Image with background square - more compact */}
+                    <div className="relative flex-shrink-0">
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-32 h-32 bg-gray-300 rounded-2xl transition-all duration-300 ease-out group-hover:rotate-6 group-hover:scale-110 group-hover:bg-gray-400" />
+
+                      <div className="relative z-10 w-36 h-36 rounded-full overflow-hidden border-4 border-white shadow-xl transition-all duration-300 ease-out group-hover:scale-105 group-hover:-translate-y-1 group-hover:rotate-3">
+                        <img
+                          src={testimonial.image || "/placeholder.svg"}
+                          alt={testimonial.product}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="relative bg-white rounded-2xl p-5 shadow-lg border-3 border-gray-300 transition-all duration-300 ease-out group-hover:scale-105 group-hover:-rotate-1 group-hover:shadow-xl group-hover:border-gray-400 flex-1">
+                      {/* Quote icon - smaller */}
+                      <div className="text-gray-400 mb-2 transition-all duration-300 group-hover:text-gray-600 group-hover:scale-110">
+                        <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z" />
+                        </svg>
+                      </div>
+
+                      {/* Testimonial text - more compact */}
+                      <p className="text-gray-700 text-sm leading-relaxed mb-3 italic">{testimonial.text}</p>
+
+                      {/* Author info - compact */}
+                      <div className="border-t border-gray-200 pt-2">
+                        <h4 className="font-bold text-gray-900 text-base mb-0.5">{testimonial.name}</h4>
+                        <p className="text-gray-600 text-xs">{testimonial.role}</p>
+                      </div>
+
+                      {/* Stars - smaller */}
+                      <div className="flex gap-0.5 mt-2 text-gray-400 transition-all duration-300 group-hover:text-yellow-400">
+                        {[...Array(5)].map((_, i) => (
+                          <svg key={i} className="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                            <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                          </svg>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-800 text-gray-300 py-8">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+              <h3 className="text-white font-semibold mb-4">CarCompraVenta</h3>
+              <p className="text-sm">Tu plataforma confiable para comprar y vender vehículos en Colombia.</p>
+            </div>
+            <div>
+              <h4 className="text-white font-semibold mb-4">Enlaces</h4>
+              <ul className="space-y-2 text-sm">
+                <li><a href="#" className="hover:text-white">Inicio</a></li>
+                <li><a href="#" className="hover:text-white">Vehículos</a></li>
+                <li><a href="#" className="hover:text-white">Vendedores</a></li>
+                <li><a href="#" className="hover:text-white">Contacto</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-white font-semibold mb-4">Servicios</h4>
+              <ul className="space-y-2 text-sm">
+                <li><a href="#" className="hover:text-white">Registro de Vehículos</a></li>
+                <li><a href="#" className="hover:text-white">Transferencia</a></li>
+                <li><a href="#" className="hover:text-white">SOAT</a></li>
+                <li><a href="#" className="hover:text-white">Licencias</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-white font-semibold mb-4">Contacto</h4>
+              <p className="text-sm">Email: info@carcompraventa.com</p>
+              <p className="text-sm">Tel: +57 123 456 7890</p>
+              <p className="text-sm">Bogotá, Colombia</p>
+            </div>
+          </div>
+          <div className="border-t border-gray-700 mt-8 pt-8 text-center text-sm">
+            <p>&copy; 2024 CarCompraVenta. Todos los derechos reservados.</p>
+          </div>
+        </div>
+      </footer>
 
     </div>
   );
