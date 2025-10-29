@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { useEffect, useState } from 'react';
 import AuthModal from './AuthModal';
+import SessionExpiredModal from './SessionExpiredModal';
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
@@ -14,34 +15,51 @@ const Navbar = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState('login'); // 'login' or 'register'
+  const [showSessionExpiredModal, setShowSessionExpiredModal] = useState(false);
 
   useEffect(() => {
     const getUserData = async () => {
       if (user) {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('role, first_name, last_name')
-          .eq('id', user.id)
-          .single();
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('role, first_name, last_name')
+            .eq('id', user.id)
+            .single();
 
-        if (!error && data) {
-          setUserRole(data.role);
-          setUserName(`${data.first_name} ${data.last_name}`.trim() || user.email);
+          if (error) {
+            if (error.message.includes('JWT') || error.message.includes('session') || error.code === 'PGRST301') {
+              setShowSessionExpiredModal(true);
+              return;
+            }
+            throw error;
+          }
 
-          // Fetch notifications for buyers
-          if (data.role === 'buyer') {
-            const { data: messages, error: messagesError } = await supabase
-              .from('messages')
-              .select(`
-                *,
-                sender:profiles!messages_sender_id_fkey(first_name, last_name),
-                receiver:profiles!messages_receiver_id_fkey(first_name, last_name),
-                vehicle:vehicles(brand, model, year)
-              `)
-              .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
-              .order('created_at', { ascending: false });
+          if (data) {
+            setUserRole(data.role);
+            setUserName(`${data.first_name} ${data.last_name}`.trim() || user.email);
 
-            if (!messagesError) {
+            // Fetch notifications for buyers
+            if (data.role === 'buyer') {
+              const { data: messages, error: messagesError } = await supabase
+                .from('messages')
+                .select(`
+                  *,
+                  sender:profiles!messages_sender_id_fkey(first_name, last_name),
+                  receiver:profiles!messages_receiver_id_fkey(first_name, last_name),
+                  vehicle:vehicles(brand, model, year)
+                `)
+                .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+                .order('created_at', { ascending: false });
+
+              if (messagesError) {
+                if (messagesError.message.includes('JWT') || messagesError.message.includes('session') || messagesError.code === 'PGRST301') {
+                  setShowSessionExpiredModal(true);
+                  return;
+                }
+                throw messagesError;
+              }
+
               // Group messages by vehicle_id, keeping only the latest message per vehicle
               const vehicleMap = new Map();
               messages?.forEach(message => {
@@ -55,6 +73,11 @@ const Navbar = () => {
               const unreadCount = groupedNotifications.filter(msg => msg.receiver_id === user.id && !msg.is_read).length;
               setUnreadNotifications(unreadCount);
             }
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+          if (error.message.includes('JWT') || error.message.includes('session') || error.code === 'PGRST301') {
+            setShowSessionExpiredModal(true);
           }
         }
       } else {
@@ -78,40 +101,63 @@ const Navbar = () => {
   };
 
   const handleNotificationClick = async (notification) => {
-    // Mark all messages for this vehicle as read
-    await supabase
-      .from('messages')
-      .update({ is_read: true })
-      .eq('vehicle_id', notification.vehicle_id)
-      .eq('receiver_id', user.id);
+    try {
+      // Mark all messages for this vehicle as read
+      const { error: updateError } = await supabase
+        .from('messages')
+        .update({ is_read: true })
+        .eq('vehicle_id', notification.vehicle_id)
+        .eq('receiver_id', user.id);
 
-    // Refresh notifications
-    const { data: messages } = await supabase
-      .from('messages')
-      .select(`
-        *,
-        sender:profiles!messages_sender_id_fkey(first_name, last_name),
-        receiver:profiles!messages_receiver_id_fkey(first_name, last_name),
-        vehicle:vehicles(brand, model, year)
-      `)
-      .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
-      .order('created_at', { ascending: false });
-
-    // Group messages by vehicle_id again
-    const vehicleMap = new Map();
-    messages?.forEach(message => {
-      if (!vehicleMap.has(message.vehicle_id)) {
-        vehicleMap.set(message.vehicle_id, message);
+      if (updateError) {
+        if (updateError.message.includes('JWT') || updateError.message.includes('session') || updateError.code === 'PGRST301') {
+          setShowSessionExpiredModal(true);
+          return;
+        }
+        throw updateError;
       }
-    });
-    const groupedNotifications = Array.from(vehicleMap.values()).slice(0, 5);
 
-    setNotifications(groupedNotifications);
-    setUnreadNotifications(groupedNotifications.filter(msg => msg.receiver_id === user.id && !msg.is_read).length);
-    setShowNotifications(false);
+      // Refresh notifications
+      const { data: messages, error: messagesError } = await supabase
+        .from('messages')
+        .select(`
+          *,
+          sender:profiles!messages_sender_id_fkey(first_name, last_name),
+          receiver:profiles!messages_receiver_id_fkey(first_name, last_name),
+          vehicle:vehicles(brand, model, year)
+        `)
+        .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+        .order('created_at', { ascending: false });
 
-    // Navigate to chats page
-    navigate('/chats');
+      if (messagesError) {
+        if (messagesError.message.includes('JWT') || messagesError.message.includes('session') || messagesError.code === 'PGRST301') {
+          setShowSessionExpiredModal(true);
+          return;
+        }
+        throw messagesError;
+      }
+
+      // Group messages by vehicle_id again
+      const vehicleMap = new Map();
+      messages?.forEach(message => {
+        if (!vehicleMap.has(message.vehicle_id)) {
+          vehicleMap.set(message.vehicle_id, message);
+        }
+      });
+      const groupedNotifications = Array.from(vehicleMap.values()).slice(0, 5);
+
+      setNotifications(groupedNotifications);
+      setUnreadNotifications(groupedNotifications.filter(msg => msg.receiver_id === user.id && !msg.is_read).length);
+      setShowNotifications(false);
+
+      // Navigate to chats page
+      navigate('/chats');
+    } catch (error) {
+      console.error('Error handling notification click:', error);
+      if (error.message.includes('JWT') || error.message.includes('session') || error.code === 'PGRST301') {
+        setShowSessionExpiredModal(true);
+      }
+    }
   };
 
   return (
@@ -291,6 +337,18 @@ const Navbar = () => {
           mode={authMode}
           onClose={() => setShowAuthModal(false)}
           onSwitchMode={(newMode) => setAuthMode(newMode)}
+        />
+      )}
+
+      {/* Session Expired Modal */}
+      {showSessionExpiredModal && (
+        <SessionExpiredModal
+          onClose={() => setShowSessionExpiredModal(false)}
+          onLogin={() => {
+            setShowSessionExpiredModal(false);
+            setAuthMode('login');
+            setShowAuthModal(true);
+          }}
         />
       )}
     </>

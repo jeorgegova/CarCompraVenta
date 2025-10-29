@@ -110,28 +110,33 @@ const UploadVehicle = () => {
 
     console.log('Starting image upload for', imageFiles.length, 'files');
 
-    for (const file of imageFiles) {
-      const fileExt = 'jpg'; // All compressed images are JPEG
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `vehicle-images/${fileName}`;
+    try {
+      for (const file of imageFiles) {
+        const fileExt = 'jpg'; // All compressed images are JPEG
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const filePath = `vehicle-images/${fileName}`;
 
-      console.log('Uploading file:', filePath);
+        console.log('Uploading file:', filePath);
 
-      const { error: uploadError } = await supabase.storage
-        .from('vehicles')
-        .upload(filePath, file);
+        const { error: uploadError } = await supabase.storage
+          .from('vehicles')
+          .upload(filePath, file);
 
-      if (uploadError) {
-        console.error('Error uploading image:', uploadError);
-        continue;
+        if (uploadError) {
+          console.error('Error uploading image:', uploadError);
+          continue;
+        }
+
+        const { data } = supabase.storage
+          .from('vehicles')
+          .getPublicUrl(filePath);
+
+        console.log('Uploaded URL:', data.publicUrl);
+        uploadedUrls.push(data.publicUrl);
       }
-
-      const { data } = supabase.storage
-        .from('vehicles')
-        .getPublicUrl(filePath);
-
-      console.log('Uploaded URL:', data.publicUrl);
-      uploadedUrls.push(data.publicUrl);
+    } catch (err) {
+      console.error('Unexpected error during image upload:', err);
+      throw err;
     }
 
     console.log('All images uploaded, URLs:', uploadedUrls);
