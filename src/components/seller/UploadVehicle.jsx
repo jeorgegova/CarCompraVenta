@@ -108,10 +108,14 @@ const UploadVehicle = () => {
   const uploadImages = async () => {
     const uploadedUrls = [];
 
+    console.log('Starting image upload for', imageFiles.length, 'files');
+
     for (const file of imageFiles) {
       const fileExt = 'jpg'; // All compressed images are JPEG
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `vehicle-images/${fileName}`;
+
+      console.log('Uploading file:', filePath);
 
       const { error: uploadError } = await supabase.storage
         .from('vehicles')
@@ -126,9 +130,11 @@ const UploadVehicle = () => {
         .from('vehicles')
         .getPublicUrl(filePath);
 
+      console.log('Uploaded URL:', data.publicUrl);
       uploadedUrls.push(data.publicUrl);
     }
 
+    console.log('All images uploaded, URLs:', uploadedUrls);
     return uploadedUrls;
   };
 
@@ -137,27 +143,39 @@ const UploadVehicle = () => {
     setUploading(true);
     setMessage('');
 
+    console.log('Starting vehicle upload');
+    console.log('User:', user);
+
     try {
       // First upload images
+      console.log('Uploading images...');
       const uploadedImageUrls = await uploadImages();
+      console.log('Images uploaded:', uploadedImageUrls);
 
       // Then create vehicle record
+      const vehicleData = {
+        ...formData,
+        images: uploadedImageUrls,
+        seller_id: user.id,
+        status: 'pending',
+        price: parseFloat(formData.price),
+        year: parseInt(formData.year),
+        mileage: parseInt(formData.mileage),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      console.log('Inserting vehicle data:', vehicleData);
+
       const { error } = await supabase
         .from('vehicles')
-        .insert({
-          ...formData,
-          images: uploadedImageUrls,
-          seller_id: user.id,
-          status: 'pending',
-          price: parseFloat(formData.price),
-          year: parseInt(formData.year),
-          mileage: parseInt(formData.mileage),
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        });
+        .insert(vehicleData);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Insert error:', error);
+        throw error;
+      }
 
+      console.log('Vehicle inserted successfully');
       setMessage('Vehículo subido exitosamente. Está pendiente de aprobación.');
 
       // Reset form
@@ -180,6 +198,7 @@ const UploadVehicle = () => {
       console.error('Error uploading vehicle:', error);
       setMessage('Error al subir el vehículo. Inténtalo de nuevo.');
     } finally {
+      console.log('Setting uploading to false');
       setUploading(false);
     }
   };
