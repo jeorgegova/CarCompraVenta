@@ -14,21 +14,44 @@ const UploadVehicle = () => {
     transmission: 'manual',
     fuel_type: 'gasolina',
     description: '',
-    images: [],
   });
+  const [rawPrice, setRawPrice] = useState('');
+  const [rawMileage, setRawMileage] = useState('');
+  const [customYear, setCustomYear] = useState('');
   const [imageFiles, setImageFiles] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  const formatPrice = (value) => {
+    if (!value) return '';
+    return '$' + value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   };
 
-  // Compress and resize image
+  const formatMileage = (value) => {
+    if (!value) return '';
+    return value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  };
+
+  const handleChange = (e) => {
+    if (e.target.name === 'price') {
+      const cleanedValue = e.target.value.replace(/\D/g, '');
+      setRawPrice(cleanedValue);
+    } else if (e.target.name === 'mileage') {
+      const cleanedValue = e.target.value.replace(/\D/g, '');
+      setRawMileage(cleanedValue);
+    } else if (e.target.name === 'customYear') {
+      setCustomYear(e.target.value);
+    } else {
+      setFormData({
+        ...formData,
+        [e.target.name]: e.target.value,
+      });
+    }
+  };
+
+  // Comprimir imagen
   const compressImage = (file, maxWidth = 1200, maxHeight = 900, quality = 0.8) => {
     return new Promise((resolve) => {
       const canvas = document.createElement('canvas');
@@ -36,30 +59,21 @@ const UploadVehicle = () => {
       const img = new Image();
 
       img.onload = () => {
-        // Calculate new dimensions
         let { width, height } = img;
-
-        if (width > height) {
-          if (width > maxWidth) {
-            height = (height * maxWidth) / width;
-            width = maxWidth;
-          }
-        } else {
-          if (height > maxHeight) {
-            width = (width * maxHeight) / height;
-            height = maxHeight;
-          }
+        if (width > height && width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        } else if (height > maxHeight) {
+          width = (width * maxHeight) / height;
+          height = maxHeight;
         }
-
         canvas.width = width;
         canvas.height = height;
-
-        // Draw and compress
         ctx.drawImage(img, 0, 0, width, height);
-
-        canvas.toBlob(resolve, 'image/jpeg', quality);
+        canvas.toBlob((blob) => {
+          if (blob) resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+        }, 'image/jpeg', quality);
       };
-
       img.src = URL.createObjectURL(file);
     });
   };
@@ -72,19 +86,11 @@ const UploadVehicle = () => {
     for (const file of files) {
       if (file.type.startsWith('image/')) {
         try {
-          // Compress the image
-          const compressedBlob = await compressImage(file);
-          const compressedFile = new File([compressedBlob], file.name, {
-            type: 'image/jpeg',
-          });
-
-          // Create preview URL
+          const compressedFile = await compressImage(file);
           const previewUrl = URL.createObjectURL(compressedFile);
           previews.push(previewUrl);
           compressedFiles.push(compressedFile);
-        } catch (error) {
-          console.error('Error compressing image:', error);
-          // Fallback to original file if compression fails
+        } catch (err) {
           const previewUrl = URL.createObjectURL(file);
           previews.push(previewUrl);
           compressedFiles.push(file);
@@ -92,55 +98,16 @@ const UploadVehicle = () => {
       }
     }
 
-    setImageFiles(prev => [...prev, ...compressedFiles]);
-    setImagePreviews(prev => [...prev, ...previews]);
+    setImageFiles((prev) => [...prev, ...compressedFiles]);
+    setImagePreviews((prev) => [...prev, ...previews]);
   };
 
   const removeImage = (index) => {
-    setImageFiles(prev => prev.filter((_, i) => i !== index));
-    setImagePreviews(prev => {
-      // Revoke the object URL to free memory
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setImagePreviews((prev) => {
       URL.revokeObjectURL(prev[index]);
       return prev.filter((_, i) => i !== index);
     });
-  };
-
-  const uploadImages = async () => {
-    const uploadedUrls = [];
-
-    console.log('Starting image upload for', imageFiles.length, 'files');
-
-    try {
-      for (const file of imageFiles) {
-        const fileExt = 'jpg'; // All compressed images are JPEG
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-        const filePath = `vehicle-images/${fileName}`;
-
-        console.log('Uploading file:', filePath);
-
-        const { error: uploadError } = await supabase.storage
-          .from('vehicles')
-          .upload(filePath, file);
-
-        if (uploadError) {
-          console.error('Error uploading image:', uploadError);
-          continue;
-        }
-
-        const { data } = supabase.storage
-          .from('vehicles')
-          .getPublicUrl(filePath);
-
-        console.log('Uploaded URL:', data.publicUrl);
-        uploadedUrls.push(data.publicUrl);
-      }
-    } catch (err) {
-      console.error('Unexpected error during image upload:', err);
-      throw err;
-    }
-
-    console.log('All images uploaded, URLs:', uploadedUrls);
-    return uploadedUrls;
   };
 
   const handleSubmit = async (e) => {
@@ -148,62 +115,107 @@ const UploadVehicle = () => {
     setUploading(true);
     setMessage('');
 
-    console.log('Starting vehicle upload');
-    console.log('User:', user);
+    // Validaciones
+    if (!formData.brand.trim()) {
+      setMessage('La marca es obligatoria.');
+      setUploading(false);
+      return;
+    }
+    if (!formData.model.trim()) {
+      setMessage('El modelo es obligatorio.');
+      setUploading(false);
+      return;
+    }
+    if (!formData.year || (formData.year === 'other' && !customYear)) {
+      setMessage('El año es obligatorio.');
+      setUploading(false);
+      return;
+    }
+    if (!rawPrice) {
+      setMessage('El precio es obligatorio.');
+      setUploading(false);
+      return;
+    }
+    if (!rawMileage) {
+      setMessage('El kilometraje es obligatorio.');
+      setUploading(false);
+      return;
+    }
+    if (!formData.location) {
+      setMessage('La ubicación es obligatoria.');
+      setUploading(false);
+      return;
+    }
+    if (!formData.description.trim()) {
+      setMessage('La descripción es obligatoria.');
+      setUploading(false);
+      return;
+    }
+    if (imageFiles.length === 0) {
+      setMessage('Debes subir al menos una imagen.');
+      setUploading(false);
+      return;
+    }
 
     try {
-      // First upload images
-      console.log('Uploading images...');
-      const uploadedImageUrls = await uploadImages();
-      console.log('Images uploaded:', uploadedImageUrls);
+      // Obtener sesión fresca
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+      console.log('Sesion antes de subir vehiculo', session);
+      
+      if (!session) throw new Error('Debes iniciar sesión');
 
-      // Then create vehicle record
-      const vehicleData = {
-        ...formData,
-        images: uploadedImageUrls,
-        seller_id: user.id,
-        status: 'pending',
-        price: parseFloat(formData.price),
-        year: parseInt(formData.year),
-        mileage: parseInt(formData.mileage),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-      console.log('Inserting vehicle data:', vehicleData);
+      // Preparar FormData
+      const form = new FormData();
+      imageFiles.forEach((file) => form.append('images', file));
+      form.append('vehicle', JSON.stringify({
+        brand: formData.brand,
+        model: formData.model,
+        year: parseInt(formData.year === 'other' ? customYear : formData.year),
+        price: parseInt(rawPrice),
+        mileage: parseInt(rawMileage),
+        location: formData.location,
+        transmission: formData.transmission,
+        fuel_type: formData.fuel_type,
+        description: formData.description,
+      }));
 
-      const { error } = await supabase
-        .from('vehicles')
-        .insert(vehicleData);
+      // Llamar a la función
+      const res = await fetch('https://hgzqnchkalmxcyuedphr.supabase.co/functions/v1/upload-vehicle', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: form,
+      });
 
-      if (error) {
-        console.error('Insert error:', error);
-        throw error;
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw new Error(result.error || 'Error del servidor');
       }
 
-      console.log('Vehicle inserted successfully');
-      setMessage('Vehículo subido exitosamente. Está pendiente de aprobación.');
+      setShowSuccessModal(true);
+      setMessage('');
 
       // Reset form
       setFormData({
-        brand: '',
-        model: '',
-        year: '',
-        price: '',
-        mileage: '',
-        location: '',
-        transmission: 'manual',
-        fuel_type: 'gasolina',
-        description: '',
-        images: [],
+        brand: '', model: '', year: '', price: '', mileage: '',
+        location: '', transmission: 'manual', fuel_type: 'gasolina', description: ''
       });
+      setRawPrice('');
+      setRawMileage('');
+      setCustomYear('');
       setImageFiles([]);
-      setImagePreviews([]);
+      setImagePreviews((prev) => {
+        prev.forEach(URL.revokeObjectURL);
+        return [];
+      });
 
     } catch (error) {
-      console.error('Error uploading vehicle:', error);
-      setMessage('Error al subir el vehículo. Inténtalo de nuevo.');
+      console.error('Error:', error);
+      setMessage(error.message || 'Error al subir el vehículo');
     } finally {
-      console.log('Setting uploading to false');
       setUploading(false);
     }
   };
@@ -221,178 +233,143 @@ const UploadVehicle = () => {
               </div>
             )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Marca *
-              </label>
-              <input
-                type="text"
-                name="brand"
-                required
-                value={formData.brand}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
-                placeholder="Ej: Toyota"
-              />
+            {showSuccessModal && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                  <div className="text-center">
+                    <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+                      <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">¡Vehículo subido exitosamente!</h3>
+                    <p className="text-sm text-gray-500 mb-4">Tu vehículo está pendiente de aprobación por parte del administrador.</p>
+                    <button
+                      onClick={() => setShowSuccessModal(false)}
+                      className="w-full bg-gray-900 hover:bg-gray-800 text-white py-2 px-4 rounded-lg font-medium transition-colors"
+                    >
+                      Aceptar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Campos del formulario */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Marca *</label>
+                <input type="text" name="brand" required value={formData.brand} onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500" placeholder="Ej: Toyota" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Modelo *</label>
+                <input type="text" name="model" required value={formData.model} onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500" placeholder="Ej: Corolla" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Año *</label>
+                <select name="year" required value={formData.year} onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500">
+                  <option value="">Selecciona un año</option>
+                  {Array.from({ length: new Date().getFullYear() + 1 - 1990 }, (_, i) => new Date().getFullYear() + 1 - i).map(year => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                  <option value="other">Otro año</option>
+                </select>
+                {formData.year === 'other' && (
+                  <input type="number" name="customYear" value={customYear} onChange={handleChange} required
+                    className="w-full mt-2 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500" placeholder="Ingresa el año" />
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Precio *</label>
+                <input type="text" name="price" required value={formatPrice(rawPrice)} onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500" placeholder="$50.000.000" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Kilometraje *</label>
+                <input type="text" name="mileage" required value={formatMileage(rawMileage)} onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500" placeholder="50.000" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Ubicación *</label>
+                <select name="location" required value={formData.location} onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500">
+                  <option value="">Selecciona una ubicación</option>
+                  <option value="Manizales">Manizales</option>
+                  <option value="Pereira">Pereira</option>
+                  <option value="Armenia">Armenia</option>
+                  <option value="Chinchiná">Chinchiná</option>
+                  <option value="Villamaría">Villamaría</option>
+                  <option value="Neira">Neira</option>
+                  <option value="Salamina">Salamina</option>
+                  <option value="Marmato">Marmato</option>
+                  <option value="Marulanda">Marulanda</option>
+                  <option value="La Dorada">La Dorada</option>
+                  <option value="Pensilvania">Pensilvania</option>
+                  <option value="Belalcázar">Belalcázar</option>
+                  <option value="Risaralda">Risaralda</option>
+                  <option value="Quinchía">Quinchía</option>
+                  <option value="Apía">Apía</option>
+                  <option value="Balboa">Balboa</option>
+                  <option value="Santuario">Santuario</option>
+                  <option value="La Celia">La Celia</option>
+                  <option value="Marsella">Marsella</option>
+                  <option value="Filandia">Filandia</option>
+                  <option value="Circasia">Circasia</option>
+                  <option value="Quimbaya">Quimbaya</option>
+                  <option value="Montenegro">Montenegro</option>
+                  <option value="Pijao">Pijao</option>
+                  <option value="Córdoba">Córdoba</option>
+                  <option value="Génova">Génova</option>
+                  <option value="Buenavista">Buenavista</option>
+                  <option value="Salento">Salento</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Transmisión</label>
+                <select name="transmission" value={formData.transmission} onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500">
+                  <option value="manual">Manual</option>
+                  <option value="automatic">Automática</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Combustible</label>
+                <select name="fuel_type" value={formData.fuel_type} onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500">
+                  <option value="gasolina">Gasolina</option>
+                  <option value="diesel">Diésel</option>
+                  <option value="electric">Eléctrico</option>
+                  <option value="hybrid">Híbrido</option>
+                </select>
+              </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Modelo *
-              </label>
-              <input
-                type="text"
-                name="model"
-                required
-                value={formData.model}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
-                placeholder="Ej: Corolla"
-              />
+              <label className="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
+              <textarea name="description" value={formData.description} onChange={handleChange} rows={4}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 resize-none"
+                placeholder="Describe las características del vehículo..." />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Año *
-              </label>
-              <input
-                type="number"
-                name="year"
-                required
-                value={formData.year}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
-                placeholder="2020"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Precio *
-              </label>
-              <input
-                type="number"
-                name="price"
-                required
-                value={formData.price}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
-                placeholder="50000000"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Kilometraje *
-              </label>
-              <input
-                type="number"
-                name="mileage"
-                required
-                value={formData.mileage}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
-                placeholder="50000"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Ubicación *
-              </label>
-              <input
-                type="text"
-                name="location"
-                required
-                value={formData.location}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
-                placeholder="Manizales"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Transmisión
-              </label>
-              <select
-                name="transmission"
-                value={formData.transmission}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
-              >
-                <option value="manual">Manual</option>
-                <option value="automatic">Automática</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tipo de Combustible
-              </label>
-              <select
-                name="fuel_type"
-                value={formData.fuel_type}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
-              >
-                <option value="gasolina">Gasolina</option>
-                <option value="diesel">Diésel</option>
-                <option value="electric">Eléctrico</option>
-                <option value="hybrid">Híbrido</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Descripción
-              </label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                rows={4}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors resize-none"
-                placeholder="Describe las características del vehículo..."
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Imágenes del vehículo (opcional)
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Imágenes del vehículo (opcional)</label>
               <div className="space-y-4">
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handleImageSelect}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
-                />
-                <p className="text-sm text-gray-500">
-                  Las imágenes se comprimirán automáticamente para optimizar el espacio de almacenamiento.
-                </p>
+                <input type="file" multiple accept="image/*" onChange={handleImageSelect}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500" />
+                <p className="text-sm text-gray-500">Las imágenes se comprimirán automáticamente.</p>
 
                 {imagePreviews.length > 0 && (
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-gray-700">Previsualización de imágenes:</p>
+                    <p className="text-sm font-medium text-gray-700">Previsualización:</p>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                      {imagePreviews.map((preview, index) => (
-                        <div key={index} className="relative group">
-                          <img
-                            src={preview}
-                            alt={`Preview ${index + 1}`}
-                            className="w-full h-24 object-cover rounded-lg border border-gray-200"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => removeImage(index)}
-                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
+                      {imagePreviews.map((preview, i) => (
+                        <div key={i} className="relative group">
+                          <img src={preview} alt="" className="w-full h-24 object-cover rounded-lg border" />
+                          <button type="button" onClick={() => removeImage(i)}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 text-xs opacity-0 group-hover:opacity-100 transition">
                             ×
                           </button>
                         </div>
@@ -403,11 +380,8 @@ const UploadVehicle = () => {
               </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={uploading}
-              className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3 px-4 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
+            <button type="submit" disabled={uploading}
+              className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3 px-4 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
               {uploading ? (
                 <span className="flex items-center justify-center">
                   <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

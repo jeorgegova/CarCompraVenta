@@ -20,6 +20,8 @@ const Navbar = () => {
   useEffect(() => {
     const getUserData = async () => {
       if (user) {
+        console.log('Usuario: ',user);
+        
         try {
           const { data, error } = await supabase
             .from('profiles')
@@ -28,6 +30,8 @@ const Navbar = () => {
             .single();
 
           if (error) {
+            console.log('error..', error);
+            
             if (error.message.includes('JWT') || error.message.includes('session') || error.code === 'PGRST301') {
               setShowSessionExpiredModal(true);
               return;
@@ -35,6 +39,8 @@ const Navbar = () => {
             throw error;
           }
 
+          console.log('Data..', data);
+          
           if (data) {
             setUserRole(data.role);
             setUserName(`${data.first_name} ${data.last_name}`.trim() || user.email);
