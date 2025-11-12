@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
+import VehicleCard from '../components/VehicleCard';
 
 const Vehicles = () => {
+  const { runQuery } = useAuth();
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
@@ -25,23 +26,24 @@ const Vehicles = () => {
   const fetchVehicles = async () => {
     setLoading(true);
     try {
-      let query = supabase
-        .from('vehicles')
-        .select('*')
-        .eq('status', 'approved');
+      const { data, error } = await runQuery((s) => {
+        let q = s
+          .from('vehicles')
+          .select('*')
+          .eq('status', 'approved');
 
-      // Apply filters
-      if (filters.brand) query = query.ilike('brand', `%${filters.brand}%`);
-      if (filters.model) query = query.ilike('model', `%${filters.model}%`);
-      if (filters.location) query = query.ilike('location', `%${filters.location}%`);
-      if (filters.minPrice) query = query.gte('price', filters.minPrice);
-      if (filters.maxPrice) query = query.lte('price', filters.maxPrice);
-      if (filters.minYear) query = query.gte('year', filters.minYear);
-      if (filters.maxYear) query = query.lte('year', filters.maxYear);
-      if (filters.minMileage) query = query.gte('mileage', filters.minMileage);
-      if (filters.maxMileage) query = query.lte('mileage', filters.maxMileage);
+        if (filters.brand) q = q.ilike('brand', `%${filters.brand}%`);
+        if (filters.model) q = q.ilike('model', `%${filters.model}%`);
+        if (filters.location) q = q.ilike('location', `%${filters.location}%`);
+        if (filters.minPrice) q = q.gte('price', filters.minPrice);
+        if (filters.maxPrice) q = q.lte('price', filters.maxPrice);
+        if (filters.minYear) q = q.gte('year', filters.minYear);
+        if (filters.maxYear) q = q.lte('year', filters.maxYear);
+        if (filters.minMileage) q = q.gte('mileage', filters.minMileage);
+        if (filters.maxMileage) q = q.lte('mileage', filters.maxMileage);
 
-      const { data, error } = await query;
+        return q;
+      });
 
       if (error) throw error;
       setVehicles(data || []);
@@ -212,37 +214,7 @@ const Vehicles = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {vehicles.map((vehicle) => (
-              <Link
-                key={vehicle.id}
-                to={`/vehicles/${vehicle.id}`}
-                className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden border border-gray-200"
-              >
-                <div className="relative">
-                  {vehicle.images && vehicle.images.length > 0 ? (
-                    <img
-                      src={vehicle.images[0]}
-                      alt={`${vehicle.brand} ${vehicle.model}`}
-                      className="w-full h-48 object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
-                      <span className="text-gray-400 text-3xl">🚗</span>
-                    </div>
-                  )}
-                </div>
-                <div className="p-4">
-                  <h3 className="font-medium text-gray-900 mb-1 text-sm">
-                    {vehicle.brand} {vehicle.model} {vehicle.year}
-                  </h3>
-                  <p className="text-xl font-bold text-green-600 mb-2">
-                    ${vehicle.price?.toLocaleString()}
-                  </p>
-                  <div className="text-xs text-gray-600 space-y-1">
-                    <p>{vehicle.mileage?.toLocaleString()} km • {vehicle.location}</p>
-                    <p className="text-gray-500">{vehicle.transmission} • {vehicle.fuel_type}</p>
-                  </div>
-                </div>
-              </Link>
+              <VehicleCard key={vehicle.id} vehicle={vehicle} />
             ))}
           </div>
         )}

@@ -158,12 +158,8 @@ const UploadVehicle = () => {
     }
 
     try {
-      // Obtener sesión fresca
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError) throw sessionError;
-      console.log('Sesion antes de subir vehiculo', session);
-      
-      if (!session) throw new Error('Debes iniciar sesión');
+      // Usar la sesión del contexto de autenticación
+      if (!user) throw new Error('Debes iniciar sesión');
 
       // Preparar FormData
       const form = new FormData();
@@ -184,7 +180,7 @@ const UploadVehicle = () => {
       const res = await fetch('https://hgzqnchkalmxcyuedphr.supabase.co/functions/v1/upload-vehicle', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
         },
         body: form,
       });

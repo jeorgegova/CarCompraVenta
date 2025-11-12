@@ -1,8 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
+import VehicleCard from '../components/VehicleCard';
+import ServicesSection from '../components/ServicesSection';
+import AboutUsSection from '../components/AboutUsSection';
+import ScrollToTopButton from '../components/ScrollToTopButton';
 
 const Home = () => {
+  const { runQuery } = useAuth();
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const scrollContainerRef = useRef(null);
@@ -45,12 +50,14 @@ const Home = () => {
 
   const fetchApprovedVehicles = async () => {
     try {
-      const { data, error } = await supabase
-        .from('vehicles')
-        .select('*')
-        .eq('status', 'approved')
-        .order('created_at', { ascending: false })
-        .limit(50); // Increased limit to get more data for filters
+      const { data, error } = await runQuery((s) =>
+        s
+          .from('vehicles')
+          .select('*')
+          .eq('status', 'approved')
+          .order('created_at', { ascending: false })
+          .limit(50)
+      );
 
       if (error) throw error;
       setVehicles(data || []);
@@ -128,6 +135,8 @@ const Home = () => {
     });
   };
 
+  const [currentSlide, setCurrentSlide] = useState(0);
+
   const filteredVehicles = vehicles.filter(vehicle => {
     return (
       (!filters.brand || vehicle.brand.toLowerCase().includes(filters.brand.toLowerCase())) &&
@@ -144,46 +153,14 @@ const Home = () => {
     );
   });
 
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % 6);
+  };
 
-  const services = [
-    {
-      title: "Registro de Vehículos",
-      description: "Registro completo de vehículos nuevos y usados con toda la documentación requerida.",
-      image: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1200&h=600&fit=crop&auto=format&q=80",
-      details: ["Registro inicial", "Actualización de datos", "Certificación de propiedad"],
-    },
-    {
-      title: "Transferencia de Propiedad",
-      description: "Transferencia rápida y segura de propiedad con verificación completa de documentos.",
-      image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=1200&h=600&fit=crop&auto=format&q=80",
-      details: ["Verificación de documentos", "Tramite ante tránsito", "Entrega inmediata"],
-    },
-    {
-      title: "SOAT y Seguros",
-      description: "Renovación y expedición de SOAT con las mejores aseguradoras del mercado.",
-      image: "https://images.unsplash.com/photo-1485291571150-772bcfc10da5?w=1200&h=600&fit=crop&auto=format&q=80",
-      details: ["Cotización automática", "Pago en línea", "Entrega digital"],
-    },
-    {
-      title: "Licencias de Conducir",
-      description: "Expedición de licencias de conducción para todo tipo de vehículo.",
-      image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&h=600&fit=crop&auto=format&q=80",
-      details: ["Examen teórico", "Examen práctico", "Licencias especiales"],
-    },
-    {
-      title: "Revisión Técnico Mecánica",
-      description: "Revisión técnico mecánica completa en centros autorizados.",
-      image: "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=1200&h=600&fit=crop&auto=format&q=80",
-      details: ["Inspección visual", "Pruebas de emisiones", "Certificación oficial"],
-    },
-    {
-      title: "Trámites de Importación",
-      description: "Asesoría completa para importación de vehículos desde el exterior.",
-      image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&h=600&fit=crop&auto=format&q=80",
-      details: ["Documentación aduanera", "Homologación", "Registro nacional"],
-    },
-  ]
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + 6) % 6);
+  };
+
 
   const testimonials = [
   {
@@ -209,22 +186,12 @@ const Home = () => {
   },
 ]
 
-  // Auto-slide functionality
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % services.length);
-    }, 4000); // Change slide every 4 seconds
 
-    return () => clearInterval(interval);
-  }, [services.length]);
-
-
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % services.length);
-  };
-
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + services.length) % services.length);
+  const scrollToServices = () => {
+    const servicesSection = document.getElementById('services');
+    if (servicesSection) {
+      servicesSection.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   return (
@@ -237,7 +204,7 @@ const Home = () => {
           <div
             className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-1000 ease-out transform scale-105"
             style={{
-              backgroundImage: `url('${services[currentSlide].image}')`,
+              backgroundImage: `url('https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1200&h=600&fit=crop&auto=format&q=80')`,
               filter: 'grayscale(60%) contrast(1) brightness(1)'
             }}
           ></div>
@@ -256,7 +223,38 @@ const Home = () => {
                   className="flex transition-transform duration-1000 ease-in-out"
                   style={{ transform: `translateX(-${currentSlide * 100}%)` }}
                 >
-                  {services.map((service, index) => (
+                  {[
+                    {
+                      title: "Registro de Vehículos",
+                      description: "Registro completo de vehículos nuevos y usados con toda la documentación requerida.",
+                      details: ["Registro inicial", "Actualización de datos", "Certificación de propiedad"],
+                    },
+                    {
+                      title: "Transferencia de Propiedad",
+                      description: "Transferencia rápida y segura de propiedad con verificación completa de documentos.",
+                      details: ["Verificación de documentos", "Tramite ante tránsito", "Entrega inmediata"],
+                    },
+                    {
+                      title: "SOAT y Seguros",
+                      description: "Renovación y expedición de SOAT con las mejores aseguradoras del mercado.",
+                      details: ["Cotización automática", "Pago en línea", "Entrega digital"],
+                    },
+                    {
+                      title: "Licencias de Conducir",
+                      description: "Expedición de licencias de conducción para todo tipo de vehículo.",
+                      details: ["Examen teórico", "Examen práctico", "Licencias especiales"],
+                    },
+                    {
+                      title: "Revisión Técnico Mecánica",
+                      description: "Revisión técnico mecánica completa en centros autorizados.",
+                      details: ["Inspección visual", "Pruebas de emisiones", "Certificación oficial"],
+                    },
+                    {
+                      title: "Trámites de Importación",
+                      description: "Asesoría completa para importación de vehículos desde el exterior.",
+                      details: ["Documentación aduanera", "Homologación", "Registro nacional"],
+                    },
+                  ].map((service, index) => (
                     <div key={index} className="w-full flex-shrink-0 p-5">
                       <div className="text-center">
                         {/* Icono */}
@@ -317,7 +315,38 @@ const Home = () => {
 
               {/* Indicadores */}
               <div className="flex justify-center gap-1.5 mt-4">
-                {services.map((_, index) => (
+                {[
+                  {
+                    title: "Registro de Vehículos",
+                    description: "Registro completo de vehículos nuevos y usados con toda la documentación requerida.",
+                    details: ["Registro inicial", "Actualización de datos", "Certificación de propiedad"],
+                  },
+                  {
+                    title: "Transferencia de Propiedad",
+                    description: "Transferencia rápida y segura de propiedad con verificación completa de documentos.",
+                    details: ["Verificación de documentos", "Tramite ante tránsito", "Entrega inmediata"],
+                  },
+                  {
+                    title: "SOAT y Seguros",
+                    description: "Renovación y expedición de SOAT con las mejores aseguradoras del mercado.",
+                    details: ["Cotización automática", "Pago en línea", "Entrega digital"],
+                  },
+                  {
+                    title: "Licencias de Conducir",
+                    description: "Expedición de licencias de conducción para todo tipo de vehículo.",
+                    details: ["Examen teórico", "Examen práctico", "Licencias especiales"],
+                  },
+                  {
+                    title: "Revisión Técnico Mecánica",
+                    description: "Revisión técnico mecánica completa en centros autorizados.",
+                    details: ["Inspección visual", "Pruebas de emisiones", "Certificación oficial"],
+                  },
+                  {
+                    title: "Trámites de Importación",
+                    description: "Asesoría completa para importación de vehículos desde el exterior.",
+                    details: ["Documentación aduanera", "Homologación", "Registro nacional"],
+                  },
+                ].map((_, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentSlide(index)}
@@ -631,37 +660,7 @@ const Home = () => {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredVehicles.map((vehicle) => (
-                    <Link
-                      key={vehicle.id}
-                      to={`/vehicles/${vehicle.id}`}
-                      className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden border border-gray-200"
-                    >
-                      <div className="relative">
-                        {vehicle.images && vehicle.images.length > 0 ? (
-                          <img
-                            src={vehicle.images[0]}
-                            alt={`${vehicle.brand} ${vehicle.model}`}
-                            className="w-full h-48 object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
-                            <span className="text-gray-400 text-3xl">🚗</span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="p-4">
-                        <h3 className="font-medium text-gray-900 mb-1 text-sm">
-                          {vehicle.brand} {vehicle.model} {vehicle.year}
-                        </h3>
-                        <p className="text-xl font-bold text-green-600 mb-2">
-                          ${vehicle.price?.toLocaleString()}
-                        </p>
-                        <div className="text-xs text-gray-600 space-y-1">
-                          <p>{vehicle.mileage?.toLocaleString()} km • {vehicle.location}</p>
-                          <p className="text-gray-500">{vehicle.transmission} • {vehicle.fuel_type}</p>
-                        </div>
-                      </div>
-                    </Link>
+                    <VehicleCard key={vehicle.id} vehicle={vehicle} />
                   ))}
                 </div>
               )}
@@ -670,8 +669,16 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Services Section */}
+      <div id="services">
+        <ServicesSection />
+      </div>
+
+      {/* About Us Section */}
+      <AboutUsSection />
+
       {/* Testimonials Section */}
-      <section className="py-12 bg-gray-50">
+      <section id="testimonials" className="py-12 bg-gray-50">
         <div className="w-full px-4">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">Testimonios de Clientes</h2>
@@ -759,10 +766,25 @@ const Home = () => {
             <div>
               <h4 className="text-white font-semibold mb-4">Servicios</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white">Registro de Vehículos</a></li>
-                <li><a href="#" className="hover:text-white">Transferencia</a></li>
-                <li><a href="#" className="hover:text-white">SOAT</a></li>
-                <li><a href="#" className="hover:text-white">Licencias</a></li>
+                <li><button onClick={scrollToServices} className="hover:text-white text-left">Traspaso</button></li>
+                <li><button onClick={scrollToServices} className="hover:text-white text-left">Levantamiento de Prenda</button></li>
+                <li><button onClick={scrollToServices} className="hover:text-white text-left">Inscripción de Prenda</button></li>
+                <li><button onClick={scrollToServices} className="hover:text-white text-left">Radicación de Cuenta</button></li>
+                <li><button onClick={scrollToServices} className="hover:text-white text-left">Traslados</button></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-white font-semibold mb-4">Empresa</h4>
+              <ul className="space-y-2 text-sm">
+                <li><button onClick={() => {
+                  const aboutSection = document.getElementById('about');
+                  if (aboutSection) {
+                    aboutSection.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }} className="hover:text-white text-left">Sobre Nosotros</button></li>
+                <li><a href="#testimonials" className="hover:text-white">Testimonios</a></li>
+                <li><a href="#contact" className="hover:text-white">Contacto</a></li>
               </ul>
             </div>
             <div>
@@ -772,11 +794,14 @@ const Home = () => {
               <p className="text-sm">Bogotá, Colombia</p>
             </div>
           </div>
-          <div className="border-t border-gray-700 mt-8 pt-8 text-center text-sm">
+          <div id="contact" className="border-t border-gray-700 mt-8 pt-8 text-center text-sm">
             <p>&copy; 2024 CarCompraVenta. Todos los derechos reservados.</p>
           </div>
         </div>
       </footer>
+
+      {/* Scroll to Top Button */}
+      <ScrollToTopButton />
 
     </div>
   );

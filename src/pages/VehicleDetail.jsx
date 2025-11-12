@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { supabase } from "../lib/supabase";
 import { useAuth } from "../contexts/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Zoom from "react-medium-image-zoom";
@@ -9,7 +8,7 @@ import "react-medium-image-zoom/dist/styles.css";
 const VehicleDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, runQuery } = useAuth();
 
   const [vehicle, setVehicle] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -38,11 +37,13 @@ const VehicleDetail = () => {
 
   const fetchVehicle = async () => {
     try {
-      const { data, error } = await supabase
-        .from("vehicles")
-        .select("*")
-        .eq("id", id)
-        .single();
+      const { data, error } = await runQuery((s) =>
+        s
+          .from("vehicles")
+          .select("*")
+          .eq("id", id)
+          .single()
+      );
 
       if (error) throw error;
       setVehicle(data);
@@ -59,7 +60,7 @@ const VehicleDetail = () => {
 
     setReserving(true);
     try {
-      const { error } = await supabase.from("reservations").insert({
+      const { error } = await runQuery((s) => s.from("reservations").insert({
         vehicle_id: id,
         user_id: user.id,
         reservation_date: reservationDate,
@@ -67,7 +68,7 @@ const VehicleDetail = () => {
         status: "pending",
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-      });
+      }));
       if (error) throw error;
 
       setMessage("✅ Reserva creada exitosamente. Te contactaremos pronto.");
@@ -84,12 +85,14 @@ const VehicleDetail = () => {
   const handleContact = async () => {
     if (!user) return navigate("/login");
     try {
-      const { data: admin } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("role", "admin")
-        .limit(1)
-        .single();
+      const { data: admin } = await runQuery((s) =>
+        s
+          .from("profiles")
+          .select("id")
+          .eq("role", "admin")
+          .limit(1)
+          .single()
+      );
 
       if (!admin) {
         alert("No hay asesores disponibles en este momento.");
@@ -105,16 +108,18 @@ const VehicleDetail = () => {
 
   const fetchChatMessages = async () => {
     try {
-      const { data, error } = await supabase
-        .from('messages')
-        .select(`
-          *,
-          sender:profiles!messages_sender_id_fkey(first_name, last_name),
-          receiver:profiles!messages_receiver_id_fkey(first_name, last_name)
-        `)
-        .or(`and(sender_id.eq.${user.id},receiver_id.eq.${receiverId}),and(sender_id.eq.${receiverId},receiver_id.eq.${user.id})`)
-        .eq('vehicle_id', id)
-        .order('created_at', { ascending: true });
+      const { data, error } = await runQuery((s) =>
+        s
+          .from('messages')
+          .select(`
+            *,
+            sender:profiles!messages_sender_id_fkey(first_name, last_name),
+            receiver:profiles!messages_receiver_id_fkey(first_name, last_name)
+          `)
+          .or(`and(sender_id.eq.${user.id},receiver_id.eq.${receiverId}),and(sender_id.eq.${receiverId},receiver_id.eq.${user.id})`)
+          .eq('vehicle_id', id)
+          .order('created_at', { ascending: true })
+      );
 
       if (error) throw error;
       setChatMessages(data || []);
@@ -127,14 +132,14 @@ const VehicleDetail = () => {
     if (!chatMessage.trim()) return;
     setSendingMessage(true);
     try {
-      const { error } = await supabase.from("messages").insert({
+      const { error } = await runQuery((s) => s.from("messages").insert({
         sender_id: user.id,
         receiver_id: receiverId,
         vehicle_id: id,
         content: chatMessage.trim(),
         is_read: false,
         created_at: new Date().toISOString(),
-      });
+      }));
 
       if (error) throw error;
       setChatMessage("");

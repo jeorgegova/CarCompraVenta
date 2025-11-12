@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 
 const BuyerChats = () => {
-  const { user } = useAuth();
+  const { user, runQuery } = useAuth();
   const navigate = useNavigate();
   const [conversations, setConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
@@ -31,22 +30,24 @@ const BuyerChats = () => {
   const fetchConversations = async () => {
     try {
       // Get all conversations where the buyer is involved
-      const { data, error } = await supabase
-        .from('messages')
-        .select(`
-          id,
-          vehicle_id,
-          sender_id,
-          receiver_id,
-          content,
-          created_at,
-          is_read,
-          vehicle:vehicles(brand, model, year),
-          sender:profiles!messages_sender_id_fkey(first_name, last_name),
-          receiver:profiles!messages_receiver_id_fkey(first_name, last_name)
-        `)
-        .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
-        .order('created_at', { ascending: false });
+      const { data, error } = await runQuery((s) =>
+        s
+          .from('messages')
+          .select(`
+            id,
+            vehicle_id,
+            sender_id,
+            receiver_id,
+            content,
+            created_at,
+            is_read,
+            vehicle:vehicles(brand, model, year),
+            sender:profiles!messages_sender_id_fkey(first_name, last_name),
+            receiver:profiles!messages_receiver_id_fkey(first_name, last_name)
+          `)
+          .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+          .order('created_at', { ascending: false })
+      );
 
       if (error) throw error;
 
@@ -93,16 +94,18 @@ const BuyerChats = () => {
 
   const fetchMessages = async (vehicleId, receiverId) => {
     try {
-      const { data, error } = await supabase
-        .from('messages')
-        .select(`
-          *,
-          sender:profiles!messages_sender_id_fkey(first_name, last_name),
-          receiver:profiles!messages_receiver_id_fkey(first_name, last_name)
-        `)
-        .or(`and(sender_id.eq.${user.id},receiver_id.eq.${receiverId}),and(sender_id.eq.${receiverId},receiver_id.eq.${user.id})`)
-        .eq('vehicle_id', vehicleId)
-        .order('created_at', { ascending: true });
+      const { data, error } = await runQuery((s) =>
+        s
+          .from('messages')
+          .select(`
+            *,
+            sender:profiles!messages_sender_id_fkey(first_name, last_name),
+            receiver:profiles!messages_receiver_id_fkey(first_name, last_name)
+          `)
+          .or(`and(sender_id.eq.${user.id},receiver_id.eq.${receiverId}),and(sender_id.eq.${receiverId},receiver_id.eq.${user.id})`)
+          .eq('vehicle_id', vehicleId)
+          .order('created_at', { ascending: true })
+      );
 
       if (error) throw error;
       setMessages(data || []);
@@ -119,7 +122,7 @@ const BuyerChats = () => {
     const [vehicleId, receiverId] = selectedConversation.id.split('|');
 
     try {
-      const { error } = await supabase
+      const { error } = await runQuery((s) => s
         .from('messages')
         .insert({
           sender_id: user.id,
@@ -128,7 +131,7 @@ const BuyerChats = () => {
           content: newMessage.trim(),
           is_read: false,
           created_at: new Date().toISOString()
-        });
+        }));
 
       if (error) throw error;
 
@@ -154,13 +157,13 @@ const BuyerChats = () => {
     const [vehicleId, senderId] = conversationId.split('|');
 
     try {
-      const { error } = await supabase
+      const { error } = await runQuery((s) => s
         .from('messages')
         .update({ is_read: true })
         .eq('sender_id', senderId)
         .eq('receiver_id', user.id)
         .eq('vehicle_id', vehicleId)
-        .eq('is_read', false);
+        .eq('is_read', false));
 
       if (error) throw error;
 

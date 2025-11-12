@@ -1,34 +1,16 @@
 import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../lib/supabase';
 
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
-  const { user, loading } = useAuth();
-  const [userRole, setUserRole] = useState(null);
-  const [roleLoading, setRoleLoading] = useState(true);
+  const { user, loading, userRole, roleLoading } = useAuth();
   const [emailConfirmed, setEmailConfirmed] = useState(false);
 
   useEffect(() => {
-    const getUserRole = async () => {
-      if (user) {
-        // Check if email is confirmed
-        setEmailConfirmed(user.email_confirmed_at !== null);
-
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single();
-
-        if (!error && data) {
-          setUserRole(data.role);
-        }
-      }
-      setRoleLoading(false);
-    };
-
-    getUserRole();
+    if (user) {
+      // Check if email is confirmed
+      setEmailConfirmed(user.email_confirmed_at !== null);
+    }
   }, [user]);
 
   if (loading || roleLoading) {
