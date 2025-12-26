@@ -161,20 +161,24 @@ const Navbar = () => {
           <div className="flex justify-between items-center h-16">
             {/* Logo and Navigation Links */}
             <div className="flex items-center space-x-6">
-              <button
-                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              <Link
+                to="/"
                 className="text-gray-900 text-xl md:text-2xl font-bold hover:text-gray-700 transition duration-200"
               >
                 CarCompraVenta
-              </button>
+              </Link>
 
               {/* Navigation Links - Hidden on mobile, shown on desktop */}
               <div className="hidden md:flex items-center space-x-4">
                 <button
                   onClick={() => {
-                    const servicesSection = document.getElementById('services');
-                    if (servicesSection) {
-                      servicesSection.scrollIntoView({ behavior: 'smooth' });
+                    if (window.location.pathname !== '/') {
+                      window.location.href = '/#services';
+                    } else {
+                      const servicesSection = document.getElementById('services');
+                      if (servicesSection) {
+                        servicesSection.scrollIntoView({ behavior: 'smooth' });
+                      }
                     }
                   }}
                   className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition duration-200 relative group"
@@ -185,9 +189,13 @@ const Navbar = () => {
 
                 <button
                   onClick={() => {
-                    const aboutSection = document.getElementById('about');
-                    if (aboutSection) {
-                      aboutSection.scrollIntoView({ behavior: 'smooth' });
+                    if (window.location.pathname !== '/') {
+                      window.location.href = '/#about';
+                    } else {
+                      const aboutSection = document.getElementById('about');
+                      if (aboutSection) {
+                        aboutSection.scrollIntoView({ behavior: 'smooth' });
+                      }
                     }
                   }}
                   className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition duration-200 relative group"

@@ -5,6 +5,7 @@ import VehicleApprovals from '../components/admin/VehicleApprovals';
 import UserManagement from '../components/admin/UserManagement';
 import ReservationManagement from '../components/admin/ReservationManagement';
 import ChatManagement from './admin/ChatManagement';
+import AdminUploadVehicle from '../components/admin/AdminUploadVehicle';
 
 const AdminDashboard = () => {
   const location = useLocation();
@@ -24,41 +25,46 @@ const AdminDashboard = () => {
               <nav className="space-y-2">
                 <Link
                   to="/admin"
-                  className={`block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                    location.pathname === '/admin'
-                      ? 'bg-gray-900 text-white'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+                  className={`block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${location.pathname === '/admin'
+                    ? 'bg-gray-900 text-white'
+                    : 'text-gray-700 hover:bg-gray-100'
+                    }`}
                 >
                   Aprobar Vehículos
                 </Link>
                 <Link
+                  to="/admin/create-vehicle"
+                  className={`block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${location.pathname === '/admin/create-vehicle'
+                    ? 'bg-gray-900 text-white'
+                    : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                >
+                  Crear Vehículo
+                </Link>
+                <Link
                   to="/admin/users"
-                  className={`block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                    location.pathname === '/admin/users'
-                      ? 'bg-gray-900 text-white'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+                  className={`block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${location.pathname === '/admin/users'
+                    ? 'bg-gray-900 text-white'
+                    : 'text-gray-700 hover:bg-gray-100'
+                    }`}
                 >
                   Gestionar Usuarios
                 </Link>
                 <Link
                   to="/admin/reservations"
-                  className={`block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                    location.pathname === '/admin/reservations'
-                      ? 'bg-gray-900 text-white'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+                  className={`block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${location.pathname === '/admin/reservations'
+                    ? 'bg-gray-900 text-white'
+                    : 'text-gray-700 hover:bg-gray-100'
+                    }`}
                 >
                   Gestionar Reservas
                 </Link>
                 <Link
                   to="/admin/chats"
-                  className={`block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                    location.pathname === '/admin/chats'
-                      ? 'bg-gray-900 text-white'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+                  className={`block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${location.pathname === '/admin/chats'
+                    ? 'bg-gray-900 text-white'
+                    : 'text-gray-700 hover:bg-gray-100'
+                    }`}
                 >
                   Gestionar Chats
                 </Link>
@@ -73,6 +79,7 @@ const AdminDashboard = () => {
               <Route path="/users" element={<UserManagement />} />
               <Route path="/reservations" element={<ReservationManagement />} />
               <Route path="/chats" element={<ChatManagement />} />
+              <Route path="/create-vehicle" element={<AdminUploadVehicle />} />
             </Routes>
           </div>
         </div>

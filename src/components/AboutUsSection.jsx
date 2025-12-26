@@ -44,6 +44,7 @@ const AboutUsSection = () => {
 
   return (
     <section
+      id="about"
       ref={ref}
       className="py-20 px-6 bg-gradient-to-b from-white to-gray-50 overflow-hidden"
     >

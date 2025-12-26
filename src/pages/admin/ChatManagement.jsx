@@ -23,7 +23,7 @@ const ChatManagement = () => {
 
   const fetchConversations = async () => {
     try {
-      // Get all conversations where admin is involved
+      // Get all messages where sender or receiver is admin
       const { data, error } = await supabase
         .from('messages')
         .select(`
@@ -35,43 +35,50 @@ const ChatManagement = () => {
           created_at,
           is_read,
           vehicle:vehicles(brand, model, year),
-          sender:profiles!messages_sender_id_fkey(first_name, last_name, email),
-          receiver:profiles!messages_receiver_id_fkey(first_name, last_name, email)
+          sender:profiles!messages_sender_id_fkey(first_name, last_name, email, role),
+          receiver:profiles!messages_receiver_id_fkey(first_name, last_name, email, role)
         `)
-        .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      // Group by conversation (vehicle + user pair)
+      // Filter messages where at least one party is admin
+      const adminMessages = data.filter(message =>
+        message.sender.role === 'admin' || message.receiver.role === 'admin'
+      );
+
+      // Group by conversation (vehicle + non-admin user)
       const conversationMap = new Map();
 
-      data.forEach(message => {
-        const otherUserId = message.sender_id === user.id ? message.receiver_id : message.sender_id;
+      adminMessages.forEach(message => {
+        const isSenderAdmin = message.sender.role === 'admin';
+        const userId = isSenderAdmin ? message.receiver_id : message.sender_id;
         const vehicleId = message.vehicle_id;
-        const key = `${vehicleId}|${otherUserId}`;
+        const key = `${vehicleId}|${userId}`;
 
         if (!conversationMap.has(key)) {
-          const otherUser = message.sender_id === user.id ? message.receiver : message.sender;
+          const user = isSenderAdmin ? message.receiver : message.sender;
           conversationMap.set(key, {
             id: key,
             vehicleId,
-            userId: otherUserId,
+            userId,
             vehicle: message.vehicle,
-            user: otherUser,
+            user: user,
             lastMessage: message,
-            unreadCount: message.sender_id !== user.id && !message.is_read ? 1 : 0
+            unreadCount: 0
           });
-        } else {
-          // Update unread count
-          const conv = conversationMap.get(key);
-          if (message.sender_id !== user.id && !message.is_read) {
-            conv.unreadCount += 1;
-          }
-          // Update last message if newer
-          if (new Date(message.created_at) > new Date(conv.lastMessage.created_at)) {
-            conv.lastMessage = message;
-          }
+        }
+
+        const conv = conversationMap.get(key);
+
+        // Update unread count: messages sent by user to current admin that are unread
+        if (message.sender_id === userId && message.receiver_id === user.id && !message.is_read) {
+          conv.unreadCount += 1;
+        }
+
+        // Update last message if newer
+        if (new Date(message.created_at) > new Date(conv.lastMessage.created_at)) {
+          conv.lastMessage = message;
         }
       });
 
@@ -85,22 +92,29 @@ const ChatManagement = () => {
   };
 
   const fetchMessages = async (conversationId) => {
-    const [vehicleId, receiverId] = conversationId.split('|');
+    const [vehicleId, userId] = conversationId.split('|');
 
     try {
       const { data, error } = await supabase
         .from('messages')
         .select(`
           *,
-          sender:profiles!messages_sender_id_fkey(first_name, last_name),
-          receiver:profiles!messages_receiver_id_fkey(first_name, last_name)
+          sender:profiles!messages_sender_id_fkey(first_name, last_name, role),
+          receiver:profiles!messages_receiver_id_fkey(first_name, last_name, role)
         `)
-        .or(`and(sender_id.eq.${receiverId},receiver_id.eq.${user.id}),and(sender_id.eq.${user.id},receiver_id.eq.${receiverId})`)
         .eq('vehicle_id', vehicleId)
+        .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      setMessages(data || []);
+
+      // Filter messages where the other party is admin
+      const filteredMessages = data.filter(message =>
+        (message.sender_id === userId && message.receiver.role === 'admin') ||
+        (message.receiver_id === userId && message.sender.role === 'admin')
+      );
+
+      setMessages(filteredMessages || []);
     } catch (error) {
       console.error('Error fetching messages:', error);
       setMessages([]);
@@ -111,14 +125,14 @@ const ChatManagement = () => {
     if (!newMessage.trim() || !selectedConversation) return;
 
     setSending(true);
-    const [vehicleId, receiverId] = selectedConversation.id.split('|');
+    const [vehicleId, userId] = selectedConversation.id.split('|');
 
     try {
       const { error } = await supabase
         .from('messages')
         .insert({
           sender_id: user.id,
-          receiver_id: receiverId,
+          receiver_id: userId,
           vehicle_id: vehicleId,
           content: newMessage.trim(),
           is_read: false,
@@ -139,13 +153,13 @@ const ChatManagement = () => {
   };
 
   const markAsRead = async (conversationId) => {
-    const [vehicleId, senderId] = conversationId.split('|');
+    const [vehicleId, userId] = conversationId.split('|');
 
     try {
       const { error } = await supabase
         .from('messages')
         .update({ is_read: true })
-        .eq('sender_id', senderId)
+        .eq('sender_id', userId)
         .eq('receiver_id', user.id)
         .eq('vehicle_id', vehicleId)
         .eq('is_read', false);
@@ -156,6 +170,43 @@ const ChatManagement = () => {
     } catch (error) {
       console.error('Error marking messages as read:', error);
     }
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+
+    if (date.toDateString() === today.toDateString()) {
+      return 'Hoy';
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return 'Ayer';
+    } else {
+      const diffTime = Math.abs(today - date);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      if (diffDays <= 7) {
+        return date.toLocaleDateString('es-ES', { weekday: 'long' });
+      } else {
+        return date.toLocaleDateString('es-ES');
+      }
+    }
+  };
+
+  const groupMessagesByDate = (messages) => {
+    const grouped = [];
+    let currentDate = null;
+
+    messages.forEach(message => {
+      const messageDate = new Date(message.created_at).toDateString();
+      if (messageDate !== currentDate) {
+        grouped.push({ type: 'date', date: message.created_at });
+        currentDate = messageDate;
+      }
+      grouped.push({ type: 'message', message });
+    });
+
+    return grouped;
   };
 
   const handleConversationSelect = (conversation) => {
@@ -247,30 +298,43 @@ const ChatManagement = () => {
 
                   {/* Messages */}
                   <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                    {messages.map((message) => (
-                      <div
-                        key={message.id}
-                        className={`flex ${message.sender_id === user.id ? 'justify-end' : 'justify-start'}`}
-                      >
-                        <div
-                          className={`max-w-xs px-4 py-2 rounded-lg ${
-                            message.sender_id === user.id
-                              ? 'bg-gray-900 text-white'
-                              : 'bg-gray-100 text-gray-900'
-                          }`}
-                        >
-                          <p className="text-sm">{message.content}</p>
-                          <p className={`text-xs mt-1 ${
-                            message.sender_id === user.id ? 'text-gray-300' : 'text-gray-500'
-                          }`}>
-                            {new Date(message.created_at).toLocaleTimeString('es-ES', {
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
+                    {groupMessagesByDate(messages).map((item, index) => {
+                      if (item.type === 'date') {
+                        return (
+                          <div key={index} className="text-center">
+                            <span className="inline-block bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full">
+                              {formatDate(item.date)}
+                            </span>
+                          </div>
+                        );
+                      } else {
+                        const message = item.message;
+                        return (
+                          <div
+                            key={message.id}
+                            className={`flex ${message.sender_id === user.id ? 'justify-end' : 'justify-start'}`}
+                          >
+                            <div
+                              className={`max-w-xs px-4 py-2 rounded-lg ${
+                                message.sender_id === user.id
+                                  ? 'bg-gray-900 text-white'
+                                  : 'bg-gray-100 text-gray-900'
+                              }`}
+                            >
+                              <p className="text-sm">{message.content}</p>
+                              <p className={`text-xs mt-1 ${
+                                message.sender_id === user.id ? 'text-gray-300' : 'text-gray-500'
+                              }`}>
+                                {new Date(message.created_at).toLocaleTimeString('es-ES', {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      }
+                    })}
                   </div>
 
                   {/* Message Input */}
