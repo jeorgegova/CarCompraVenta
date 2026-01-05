@@ -5,6 +5,7 @@ import VehicleCard from '../components/VehicleCard';
 import ServicesSection from '../components/ServicesSection';
 import AboutUsSection from '../components/AboutUsSection';
 import ScrollToTopButton from '../components/ScrollToTopButton';
+import compraVehiculo from '../assets/compraVehiculo.mp4';
 
 const Home = () => {
   const { runQuery } = useAuth();
@@ -43,6 +44,16 @@ const Home = () => {
     doors: '',
     color: '',
   });
+
+  const images = [
+    compraVehiculo,
+    'https://i.imgur.com/iuAVa9B.png',/* 
+    'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=1200&h=600&fit=crop&auto=format&q=80',
+    'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=1200&h=600&fit=crop&auto=format&q=80',
+    'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=1200&h=600&fit=crop&auto=format&q=80',
+    'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&h=600&fit=crop&auto=format&q=80',
+    'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&h=600&fit=crop&auto=format&q=80', */
+  ];
 
   useEffect(() => {
     fetchApprovedVehicles();
@@ -137,6 +148,13 @@ const Home = () => {
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setCurrentSlide((prev) => (prev + 1) % images.length);
+    }, 7000);
+    return () => clearTimeout(timeout);
+  }, [currentSlide]);
+
   const filteredVehicles = vehicles.filter(vehicle => {
     return (
       (!filters.brand || vehicle.brand.toLowerCase().includes(filters.brand.toLowerCase())) &&
@@ -154,11 +172,11 @@ const Home = () => {
   });
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % 6);
+    setCurrentSlide((prev) => (prev + 1) % images.length);
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + 6) % 6);
+    setCurrentSlide((prev) => (prev - 1 + images.length) % images.length);
   };
 
 
@@ -198,167 +216,69 @@ const Home = () => {
     <div className="min-h-screen font-sans text-gray-900 bg-gray-100">
 
       {/* Modern Services Carousel Section */}
-      <section className="relative h-[350px] flex items-center overflow-hidden bg-gray-100">
-        {/* Fondo animado */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-1000 ease-out transform scale-105"
-            style={{
-              backgroundImage: `url('https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1200&h=600&fit=crop&auto=format&q=80')`,
-              filter: 'grayscale(60%) contrast(1) brightness(1)'
-            }}
-          ></div>
-
-          {/* 🔹 Capa de difuminado general sobre el fondo */}
-          <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-white via-gray-50/30 to-transparent"></div>
-        </div>
-
+      <section className="relative h-[400px] flex items-center overflow-hidden bg-gray-100">
         {/* Contenido principal con blur suave */}
-        <div className="relative z-10 w-full">
-          <div className="max-w-5xl mx-auto px-4">
-            <div className="relative">
-              {/* 🔹 Cuadro principal con efecto “vidrio difuminado” */}
-              <div className="backdrop-blur-md bg-white/25 rounded-2xl border border-white/30 shadow-2xl overflow-hidden">
-                <div
-                  className="flex transition-transform duration-1000 ease-in-out"
-                  style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-                >
-                  {[
-                    {
-                      title: "Registro de Vehículos",
-                      description: "Registro completo de vehículos nuevos y usados con toda la documentación requerida.",
-                      details: ["Registro inicial", "Actualización de datos", "Certificación de propiedad"],
-                    },
-                    {
-                      title: "Transferencia de Propiedad",
-                      description: "Transferencia rápida y segura de propiedad con verificación completa de documentos.",
-                      details: ["Verificación de documentos", "Tramite ante tránsito", "Entrega inmediata"],
-                    },
-                    {
-                      title: "SOAT y Seguros",
-                      description: "Renovación y expedición de SOAT con las mejores aseguradoras del mercado.",
-                      details: ["Cotización automática", "Pago en línea", "Entrega digital"],
-                    },
-                    {
-                      title: "Licencias de Conducir",
-                      description: "Expedición de licencias de conducción para todo tipo de vehículo.",
-                      details: ["Examen teórico", "Examen práctico", "Licencias especiales"],
-                    },
-                    {
-                      title: "Revisión Técnico Mecánica",
-                      description: "Revisión técnico mecánica completa en centros autorizados.",
-                      details: ["Inspección visual", "Pruebas de emisiones", "Certificación oficial"],
-                    },
-                    {
-                      title: "Trámites de Importación",
-                      description: "Asesoría completa para importación de vehículos desde el exterior.",
-                      details: ["Documentación aduanera", "Homologación", "Registro nacional"],
-                    },
-                  ].map((service, index) => (
-                    <div key={index} className="w-full flex-shrink-0 p-5">
-                      <div className="text-center">
-                        {/* Icono */}
-                        <div className="inline-flex items-center justify-center w-11 h-11 rounded-xl bg-white/25 backdrop-blur-sm border border-white/30 mb-3">
-                          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                          </svg>
-                        </div>
-
-                        {/* Título */}
-                        <h3 className="text-lg md:text-2xl font-bold text-white mb-2 drop-shadow-md">
-                          {service.title}
-                        </h3>
-
-                        {/* Descripción */}
-                        <p className="text-gray-100 text-xs md:text-sm leading-relaxed mb-4 max-w-md mx-auto opacity-90">
-                          {service.description}
-                        </p>
-
-                        {/* Detalles */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                          {service.details.map((detail, i) => (
-                            <div
-                              key={i}
-                              className="flex items-center justify-center gap-2 text-gray-100 text-xs font-medium bg-white/15 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-white/20 hover:bg-white/25 transition-all duration-300"
-                            >
-                              <span className="w-1 h-1 bg-gray-300 rounded-full animate-pulse"></span>
-                              {detail}
-                            </div>
-                          ))}
+        <div className="relative z-10 w-full h-full">
+          <div className="w-full h-full relative overflow-hidden">
+            <div className="flex transition-transform duration-1000 ease-in-out h-full" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
+              {images.map((item, index) => (
+                <div key={index} className="w-full flex-shrink-0 h-full">
+                  {typeof item === 'string' && item.includes('.mp4') ? (
+                    <div className="relative w-full h-full">
+                      <video src={item} className="w-full h-full object-cover" autoPlay muted loop />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                        <div className="text-center text-white">
+                          <h1 className="text-3xl md:text-5xl font-extrabold mb-2 drop-shadow-2xl">
+                            Compra y Venta de Vehículos
+                          </h1>
+                          <p className="text-lg md:text-xl font-light opacity-90 drop-shadow-lg">
+                            Acompañamiento Personalizado a Comprador y Vendedor
+                          </p>
                         </div>
                       </div>
                     </div>
-                  ))}
+                  ) : (
+                    <img src={item} alt={`Slide ${index + 1}`} className="w-full h-full object-cover" />
+                  )}
                 </div>
-              </div>
-
-              {/* Botones de navegación */}
-              <button
-                onClick={prevSlide}
-                className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center hover:bg-white/30 hover:scale-110 transition-all duration-300"
-                aria-label="Anterior"
-              >
-                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-
-              <button
-                onClick={nextSlide}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center hover:bg-white/30 hover:scale-110 transition-all duration-300"
-                aria-label="Siguiente"
-              >
-                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-
-              {/* Indicadores */}
-              <div className="flex justify-center gap-1.5 mt-4">
-                {[
-                  {
-                    title: "Registro de Vehículos",
-                    description: "Registro completo de vehículos nuevos y usados con toda la documentación requerida.",
-                    details: ["Registro inicial", "Actualización de datos", "Certificación de propiedad"],
-                  },
-                  {
-                    title: "Transferencia de Propiedad",
-                    description: "Transferencia rápida y segura de propiedad con verificación completa de documentos.",
-                    details: ["Verificación de documentos", "Tramite ante tránsito", "Entrega inmediata"],
-                  },
-                  {
-                    title: "SOAT y Seguros",
-                    description: "Renovación y expedición de SOAT con las mejores aseguradoras del mercado.",
-                    details: ["Cotización automática", "Pago en línea", "Entrega digital"],
-                  },
-                  {
-                    title: "Licencias de Conducir",
-                    description: "Expedición de licencias de conducción para todo tipo de vehículo.",
-                    details: ["Examen teórico", "Examen práctico", "Licencias especiales"],
-                  },
-                  {
-                    title: "Revisión Técnico Mecánica",
-                    description: "Revisión técnico mecánica completa en centros autorizados.",
-                    details: ["Inspección visual", "Pruebas de emisiones", "Certificación oficial"],
-                  },
-                  {
-                    title: "Trámites de Importación",
-                    description: "Asesoría completa para importación de vehículos desde el exterior.",
-                    details: ["Documentación aduanera", "Homologación", "Registro nacional"],
-                  },
-                ].map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentSlide(index)}
-                    className={`transition-all duration-300 ${index === currentSlide
-                      ? 'w-7 h-1.5 bg-white rounded-full shadow-md'
-                      : 'w-1.5 h-1.5 bg-white/50 rounded-full hover:bg-white/80 hover:scale-125'
-                      }`}
-                    aria-label={`Ir a slide ${index + 1}`}
-                  />
-                ))}
-              </div>
+              ))}
             </div>
+          </div>
+
+          {/* Botones de navegación */}
+          <button
+            onClick={prevSlide}
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center hover:bg-white/30 hover:scale-110 transition-all duration-300"
+            aria-label="Anterior"
+          >
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+
+          <button
+            onClick={nextSlide}
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center hover:bg-white/30 hover:scale-110 transition-all duration-300"
+            aria-label="Siguiente"
+          >
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+
+          {/* Indicadores */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex justify-center gap-1.5">
+            {images.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentSlide(index)}
+                className={`transition-all duration-300 ${index === currentSlide
+                  ? 'w-7 h-1.5 bg-white rounded-full shadow-md'
+                  : 'w-1.5 h-1.5 bg-white/50 rounded-full hover:bg-white/80 hover:scale-125'
+                  }`}
+                aria-label={`Ir a slide ${index + 1}`}
+              />
+            ))}
           </div>
         </div>
       </section>
