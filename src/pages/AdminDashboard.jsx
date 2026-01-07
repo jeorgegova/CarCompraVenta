@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
 import VehicleApprovals from '../components/admin/VehicleApprovals';
 import UserManagement from '../components/admin/UserManagement';
 import ReservationManagement from '../components/admin/ReservationManagement';
 import ChatManagement from './admin/ChatManagement';
 import AdminUploadVehicle from '../components/admin/AdminUploadVehicle';
+import VehicleManagement from '../components/admin/VehicleManagement';
+import AdminEditVehicle from '../components/admin/AdminEditVehicle';
 
 const AdminDashboard = () => {
   const location = useLocation();
@@ -68,6 +68,15 @@ const AdminDashboard = () => {
                 >
                   Gestionar Chats
                 </Link>
+                <Link
+                  to="/admin/vehicles"
+                  className={`block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${location.pathname === '/admin/vehicles'
+                    ? 'bg-gray-900 text-white'
+                    : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                >
+                  Gestionar Vehículos Publicados
+                </Link>
               </nav>
             </div>
           </div>
@@ -80,6 +89,8 @@ const AdminDashboard = () => {
               <Route path="/reservations" element={<ReservationManagement />} />
               <Route path="/chats" element={<ChatManagement />} />
               <Route path="/create-vehicle" element={<AdminUploadVehicle />} />
+              <Route path="/vehicles" element={<VehicleManagement />} />
+              <Route path="/edit-vehicle/:id" element={<AdminEditVehicle />} />
             </Routes>
           </div>
         </div>

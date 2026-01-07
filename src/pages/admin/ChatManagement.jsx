@@ -44,7 +44,7 @@ const ChatManagement = () => {
 
       // Filter messages where at least one party is admin
       const adminMessages = data.filter(message =>
-        message.sender.role === 'admin' || message.receiver.role === 'admin'
+        message.sender?.role === 'admin' || message.receiver?.role === 'admin'
       );
 
       // Group by conversation (vehicle + non-admin user)
@@ -71,8 +71,8 @@ const ChatManagement = () => {
 
         const conv = conversationMap.get(key);
 
-        // Update unread count: messages sent by user to current admin that are unread
-        if (message.sender_id === userId && message.receiver_id === user.id && !message.is_read) {
+        // Update unread count: messages sent by user to any admin that are unread
+        if (message.sender_id === userId && message.receiver?.role === 'admin' && !message.is_read) {
           conv.unreadCount += 1;
         }
 
@@ -156,11 +156,21 @@ const ChatManagement = () => {
     const [vehicleId, userId] = conversationId.split('|');
 
     try {
+      // First, get admin users
+      const { data: admins, error: adminError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('role', 'admin');
+
+      if (adminError) throw adminError;
+
+      const adminIds = admins.map(a => a.id);
+
       const { error } = await supabase
         .from('messages')
         .update({ is_read: true })
         .eq('sender_id', userId)
-        .eq('receiver_id', user.id)
+        .in('receiver_id', adminIds)
         .eq('vehicle_id', vehicleId)
         .eq('is_read', false);
 
@@ -249,9 +259,8 @@ const ChatManagement = () => {
                     <div
                       key={conversation.id}
                       onClick={() => handleConversationSelect(conversation)}
-                      className={`p-4 cursor-pointer hover:bg-gray-50 ${
-                        selectedConversation?.id === conversation.id ? 'bg-gray-100' : ''
-                      }`}
+                      className={`p-4 cursor-pointer hover:bg-gray-50 ${selectedConversation?.id === conversation.id ? 'bg-gray-100' : ''
+                        }`}
                     >
                       <div className="flex justify-between items-start">
                         <div className="flex-1 min-w-0">
@@ -312,19 +321,17 @@ const ChatManagement = () => {
                         return (
                           <div
                             key={message.id}
-                            className={`flex ${message.sender_id === user.id ? 'justify-end' : 'justify-start'}`}
+                            className={`flex ${message.sender.role === 'admin' ? 'justify-end' : 'justify-start'}`}
                           >
                             <div
-                              className={`max-w-xs px-4 py-2 rounded-lg ${
-                                message.sender_id === user.id
+                              className={`max-w-xs px-4 py-2 rounded-lg ${message.sender.role === 'admin'
                                   ? 'bg-gray-900 text-white'
                                   : 'bg-gray-100 text-gray-900'
-                              }`}
+                                }`}
                             >
                               <p className="text-sm">{message.content}</p>
-                              <p className={`text-xs mt-1 ${
-                                message.sender_id === user.id ? 'text-gray-300' : 'text-gray-500'
-                              }`}>
+                              <p className={`text-xs mt-1 ${message.sender.role === 'admin' ? 'text-gray-300' : 'text-gray-500'
+                                }`}>
                                 {new Date(message.created_at).toLocaleTimeString('es-ES', {
                                   hour: '2-digit',
                                   minute: '2-digit'
