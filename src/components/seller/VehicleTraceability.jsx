@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 const VehicleTraceability = () => {
   const { user } = useAuth();
   const [vehicles, setVehicles] = useState([]);
+  const [reservations, setReservations] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -21,10 +22,33 @@ const VehicleTraceability = () => {
 
       if (error) throw error;
       setVehicles(data || []);
+      if (data && data.length > 0) {
+        fetchReservations(data.map(v => v.id));
+      }
     } catch (error) {
       console.error('Error fetching vehicles:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchReservations = async (vehicleIds) => {
+    try {
+      const { data, error } = await supabase
+        .from('reservations')
+        .select('*')
+        .in('vehicle_id', vehicleIds);
+
+      if (error) throw error;
+
+      const resByVehicle = {};
+      data.forEach(res => {
+        if (!resByVehicle[res.vehicle_id]) resByVehicle[res.vehicle_id] = [];
+        resByVehicle[res.vehicle_id].push(res);
+      });
+      setReservations(resByVehicle);
+    } catch (error) {
+      console.error('Error fetching reservations:', error);
     }
   };
 
@@ -53,6 +77,36 @@ const VehicleTraceability = () => {
         return 'Rechazado';
       case 'sold':
         return 'Vendido';
+      default:
+        return status;
+    }
+  };
+
+  const getReservationStatusColor = (status) => {
+    switch (status) {
+      case 'confirmed':
+        return 'bg-green-100 text-green-800';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'completed':
+        return 'bg-blue-100 text-blue-800';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getReservationStatusText = (status) => {
+    switch (status) {
+      case 'confirmed':
+        return 'Confirmada';
+      case 'pending':
+        return 'Pendiente';
+      case 'completed':
+        return 'Completada';
+      case 'cancelled':
+        return 'Cancelada';
       default:
         return status;
     }
@@ -123,6 +177,29 @@ const VehicleTraceability = () => {
                 <div className="mt-4 p-3 bg-primary-50 rounded">
                   <span className="font-medium text-primary-700">Notas del administrador:</span>
                   <p className="text-primary-600 mt-1">{vehicle.admin_notes}</p>
+                </div>
+              )}
+
+              {reservations[vehicle.id] && reservations[vehicle.id].length > 0 && (
+                <div className="mt-4">
+                  <h4 className="font-medium text-primary-700 mb-2">Reservas:</h4>
+                  <div className="space-y-2">
+                    {reservations[vehicle.id].map(res => (
+                      <div key={res.id} className="p-3 bg-gray-50 rounded">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="text-sm text-primary-600">
+                              Fecha: {new Date(res.reservation_date).toLocaleDateString()} a las {res.reservation_time}
+                            </p>
+                            {res.notes && <p className="text-sm text-primary-600">Notas: {res.notes}</p>}
+                          </div>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getReservationStatusColor(res.status)}`}>
+                            {getReservationStatusText(res.status)}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

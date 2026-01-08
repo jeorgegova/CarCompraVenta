@@ -27,6 +27,13 @@ const AdminEditVehicle = () => {
   const [removedImages, setRemovedImages] = useState([]);
   const [newImageFiles, setNewImageFiles] = useState([]);
   const [newImagePreviews, setNewImagePreviews] = useState([]);
+  const [confirmModal, setConfirmModal] = useState({
+    show: false,
+    title: '',
+    message: '',
+    action: null,
+  });
+  const [vehicleStatus, setVehicleStatus] = useState('');
 
   useEffect(() => {
     fetchVehicle();
@@ -60,6 +67,7 @@ const AdminEditVehicle = () => {
         setFormData(prev => ({ ...prev, year: 'other' }));
       }
       setCurrentImages(data.images || []);
+      setVehicleStatus(data.status || '');
     } catch (err) {
       console.error('Error fetching vehicle:', err);
       setMessage('Error al cargar el vehículo');
@@ -251,6 +259,224 @@ const AdminEditVehicle = () => {
       setMessage(error.message || 'Error al actualizar el vehículo');
     } finally {
       setUpdating(false);
+    }
+  };
+
+  const changeStatusToPending = async () => {
+    setUpdating(true);
+    setMessage('');
+
+    // Validaciones
+    if (!formData.brand.trim()) {
+      setMessage('La marca es obligatoria.');
+      setUpdating(false);
+      return;
+    }
+    if (!formData.model.trim()) {
+      setMessage('El modelo es obligatorio.');
+      setUpdating(false);
+      return;
+    }
+    if (!formData.year || (formData.year === 'other' && !customYear)) {
+      setMessage('El año es obligatorio.');
+      setUpdating(false);
+      return;
+    }
+    if (!rawPrice) {
+      setMessage('El precio es obligatorio.');
+      setUpdating(false);
+      return;
+    }
+    if (!rawMileage) {
+      setMessage('El kilometraje es obligatorio.');
+      setUpdating(false);
+      return;
+    }
+    if (!formData.location) {
+      setMessage('La ubicación es obligatoria.');
+      setUpdating(false);
+      return;
+    }
+    if (!formData.description.trim()) {
+      setMessage('La descripción es obligatoria.');
+      setUpdating(false);
+      return;
+    }
+
+    try {
+      // Subir nuevas imágenes
+      let newUrls = [];
+      if (newImageFiles.length > 0) {
+        newUrls = await uploadImages(newImageFiles);
+      }
+
+      // Combinar imágenes: actuales menos removidas + nuevas
+      const updatedImages = currentImages.filter(img => !removedImages.includes(img)).concat(newUrls);
+
+      const updateData = {
+        brand: formData.brand,
+        model: formData.model,
+        year: parseInt(formData.year === 'other' ? customYear : formData.year),
+        price: parseInt(rawPrice),
+        mileage: parseInt(rawMileage),
+        location: formData.location,
+        transmission: formData.transmission,
+        fuel_type: formData.fuel_type,
+        description: formData.description,
+        images: updatedImages,
+        status: 'pending',
+        approved_at: null,
+      };
+
+      const { error } = await supabase
+        .from('vehicles')
+        .update(updateData)
+        .eq('id', id);
+
+      if (error) throw error;
+
+      navigate('/admin');
+    } catch (error) {
+      console.error('Error changing status:', error);
+      setMessage(error.message || 'Error al cambiar el estado.');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const approvePublication = async () => {
+    setUpdating(true);
+    setMessage('');
+
+    // Validaciones
+    if (!formData.brand.trim()) {
+      setMessage('La marca es obligatoria.');
+      setUpdating(false);
+      return;
+    }
+    if (!formData.model.trim()) {
+      setMessage('El modelo es obligatorio.');
+      setUpdating(false);
+      return;
+    }
+    if (!formData.year || (formData.year === 'other' && !customYear)) {
+      setMessage('El año es obligatorio.');
+      setUpdating(false);
+      return;
+    }
+    if (!rawPrice) {
+      setMessage('El precio es obligatorio.');
+      setUpdating(false);
+      return;
+    }
+    if (!rawMileage) {
+      setMessage('El kilometraje es obligatorio.');
+      setUpdating(false);
+      return;
+    }
+    if (!formData.location) {
+      setMessage('La ubicación es obligatoria.');
+      setUpdating(false);
+      return;
+    }
+    if (!formData.description.trim()) {
+      setMessage('La descripción es obligatoria.');
+      setUpdating(false);
+      return;
+    }
+
+    try {
+      // Subir nuevas imágenes
+      let newUrls = [];
+      if (newImageFiles.length > 0) {
+        newUrls = await uploadImages(newImageFiles);
+      }
+
+      // Combinar imágenes: actuales menos removidas + nuevas
+      const updatedImages = currentImages.filter(img => !removedImages.includes(img)).concat(newUrls);
+
+      const updateData = {
+        brand: formData.brand,
+        model: formData.model,
+        year: parseInt(formData.year === 'other' ? customYear : formData.year),
+        price: parseInt(rawPrice),
+        mileage: parseInt(rawMileage),
+        location: formData.location,
+        transmission: formData.transmission,
+        fuel_type: formData.fuel_type,
+        description: formData.description,
+        images: updatedImages,
+        status: 'approved',
+        approved_at: new Date().toISOString(),
+      };
+
+      const { error } = await supabase
+        .from('vehicles')
+        .update(updateData)
+        .eq('id', id);
+
+      if (error) throw error;
+
+      navigate('/admin/vehicles');
+    } catch (error) {
+      console.error('Error approving publication:', error);
+      setMessage(error.message || 'Error al aprobar la publicación.');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const showConfirmModal = (title, message, action) => {
+    setConfirmModal({
+      show: true,
+      title,
+      message,
+      action,
+    });
+  };
+
+  const closeConfirmModal = () => {
+    setConfirmModal({
+      show: false,
+      title: '',
+      message: '',
+      action: null,
+    });
+  };
+
+  const executeAction = async () => {
+    const { action } = confirmModal;
+    closeConfirmModal();
+
+    if (action === 'delete') {
+      await deleteVehicle();
+    }
+  };
+
+  const deleteVehicle = async () => {
+    try {
+      // Delete images from storage if any
+      if (currentImages.length > 0) {
+        for (const imageUrl of currentImages) {
+          // Extract file name from URL
+          const fileName = imageUrl.split('/').pop();
+          if (fileName) {
+            await supabase.storage.from('vehicle-images').remove([fileName]);
+          }
+        }
+      }
+
+      const { error } = await supabase
+        .from('vehicles')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      navigate('/admin/vehicles');
+    } catch (error) {
+      console.error('Error deleting vehicle:', error);
+      setMessage('Error al eliminar el vehículo.');
     }
   };
 
@@ -458,9 +684,74 @@ const AdminEditVehicle = () => {
                 'Actualizar Vehículo'
               )}
             </button>
+
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Acciones Administrativas</h3>
+              <div className="flex space-x-4">
+                {vehicleStatus === 'pending' ? (
+                  <button
+                    type="button"
+                    onClick={approvePublication}
+                    className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-medium transition-colors"
+                  >
+                    Aprobar Publicación
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={changeStatusToPending}
+                    className="bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded-lg font-medium transition-colors"
+                  >
+                    Cambiar a Pendiente
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => showConfirmModal(
+                    'Eliminar Vehículo',
+                    '¿Estás seguro de que quieres eliminar este vehículo? Esta acción no se puede deshacer y eliminará también todas las imágenes asociadas.',
+                    'delete'
+                  )}
+                  className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg font-medium transition-colors"
+                >
+                  Eliminar Vehículo
+                </button>
+              </div>
+            </div>
           </form>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      {confirmModal.show && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="text-center">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-gray-100 mb-4">
+                <svg className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">{confirmModal.title}</h3>
+              <p className="text-sm text-gray-500 mb-6">{confirmModal.message}</p>
+              <div className="flex space-x-3">
+                <button
+                  onClick={closeConfirmModal}
+                  className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 px-4 rounded-lg font-medium transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={executeAction}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg font-medium transition-colors"
+                >
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -6,6 +6,7 @@ import ChatManagement from './admin/ChatManagement';
 import AdminUploadVehicle from '../components/admin/AdminUploadVehicle';
 import VehicleManagement from '../components/admin/VehicleManagement';
 import AdminEditVehicle from '../components/admin/AdminEditVehicle';
+import SalesHistory from './admin/SalesHistory';
 
 const AdminDashboard = () => {
   const location = useLocation();
@@ -77,6 +78,15 @@ const AdminDashboard = () => {
                 >
                   Gestionar Vehículos Publicados
                 </Link>
+                <Link
+                  to="/admin/sales-history"
+                  className={`block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${location.pathname === '/admin/sales-history'
+                    ? 'bg-gray-900 text-white'
+                    : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                >
+                  Historial de Ventas
+                </Link>
               </nav>
             </div>
           </div>
@@ -91,6 +101,7 @@ const AdminDashboard = () => {
               <Route path="/create-vehicle" element={<AdminUploadVehicle />} />
               <Route path="/vehicles" element={<VehicleManagement />} />
               <Route path="/edit-vehicle/:id" element={<AdminEditVehicle />} />
+              <Route path="/sales-history" element={<SalesHistory />} />
             </Routes>
           </div>
         </div>
