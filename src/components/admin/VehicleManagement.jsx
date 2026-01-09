@@ -73,7 +73,8 @@ const VehicleManagement = () => {
         .update({
           status: 'sold',
           sold_at: new Date().toISOString(),
-          price: finalPrice
+          price: finalPrice,
+          admin_notes: selectedVehicle.price?.toString()
         })
         .eq('id', selectedVehicle.id);
 

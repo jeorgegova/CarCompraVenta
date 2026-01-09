@@ -18,6 +18,7 @@ const VehicleDetail = () => {
   const [reservationDate, setReservationDate] = useState("");
   const [reservationTime, setReservationTime] = useState("");
   const [message, setMessage] = useState("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const [showChat, setShowChat] = useState(false);
   const [chatMessage, setChatMessage] = useState("");
@@ -71,9 +72,14 @@ const VehicleDetail = () => {
       }));
       if (error) throw error;
 
-      setMessage("✅ Reserva creada exitosamente. Te contactaremos pronto.");
+      setShowSuccessModal(true);
       setReservationDate("");
       setReservationTime("");
+      // Redirigir a la sección de reservas después de cerrar el modal
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        navigate('/account?tab=reservations');
+      }, 3000);
     } catch (error) {
       console.error("Error creando reserva:", error);
       setMessage("❌ Error al crear la reserva. Inténtalo de nuevo.");
@@ -322,6 +328,23 @@ const VehicleDetail = () => {
           )}
         </div>
       </div>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="text-center">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+                <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">¡Reserva creada exitosamente!</h3>
+              <p className="text-sm text-gray-500 mb-4">Te contactaremos pronto para confirmar los detalles. Serás redirigido a tu panel de reservas.</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal del chat */}
       <AnimatePresence>

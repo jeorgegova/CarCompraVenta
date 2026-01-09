@@ -98,6 +98,14 @@ const SalesHistory = () => {
     }
   };
 
+  const formatTimestampDate = (timestamp) => {
+    const date = new Date(timestamp);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
   const republishVehicle = async (vehicleId) => {
     try {
       const { error } = await supabase
@@ -280,13 +288,21 @@ const SalesHistory = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ${vehicle.price?.toLocaleString()}
+                    {vehicle.admin_notes ? (
+                      <div>
+                        <span className="line-through text-gray-500">${parseInt(vehicle.admin_notes).toLocaleString()}</span>
+                        <br />
+                        <span>${vehicle.price?.toLocaleString()}</span>
+                      </div>
+                    ) : (
+                      `$${vehicle.price?.toLocaleString()}`
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {vehicle.location}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {vehicle.sold_at ? new Date(vehicle.sold_at).toLocaleDateString('es-ES') : 'N/A'}
+                    {vehicle.sold_at ? formatTimestampDate(vehicle.sold_at) : 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">

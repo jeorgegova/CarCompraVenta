@@ -34,7 +34,8 @@ const ReservationManagement = () => {
             brand,
             model,
             year,
-            price
+            price,
+            images
           ),
           profiles:user_id (
             first_name,
@@ -198,6 +199,20 @@ const ReservationManagement = () => {
     }
   };
 
+  const formatDate = (dateString) => {
+    const [year, month, day] = dateString.split('-');
+    const date = new Date(year, month - 1, day);
+    return date.toLocaleDateString('es-CO');
+  };
+
+  const formatTimestampDate = (timestamp) => {
+    const date = new Date(timestamp);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -254,14 +269,14 @@ const ReservationManagement = () => {
                     <div>
                       <span className="font-medium text-primary-700">Fecha de cita:</span>
                       <p className="text-primary-600">
-                        {new Date(reservation.reservation_date).toLocaleDateString()} a las {reservation.reservation_time}
+                        {formatDate(reservation.reservation_date)} a las {reservation.reservation_time}
                       </p>
                     </div>
 
                     <div>
                       <span className="font-medium text-primary-700">Fecha de reserva:</span>
                       <p className="text-primary-600">
-                        {new Date(reservation.created_at).toLocaleDateString()}
+                        {formatTimestampDate(reservation.created_at)}
                       </p>
                     </div>
 
@@ -283,6 +298,15 @@ const ReservationManagement = () => {
                         {getStatusText(reservation.status)}
                       </span>
                     </div>
+                    {reservation.vehicles?.images?.length > 0 && (
+                      <div className="mt-4">
+                        <img
+                          src={reservation.vehicles.images[0]}
+                          alt={`${reservation.vehicles.brand} ${reservation.vehicles.model}`}
+                          className="w-full h-32 object-cover rounded-lg"
+                        />
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-2">
