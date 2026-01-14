@@ -6,6 +6,8 @@ import ServicesSection from '../components/ServicesSection';
 import AboutUsSection from '../components/AboutUsSection';
 import ScrollToTopButton from '../components/ScrollToTopButton';
 import compraVehiculo from '../assets/compraVehiculo.mp4';
+import compraVehiculo1 from '../assets/compraVehiculo.webp';
+
 
 const Home = () => {
   const { runQuery } = useAuth();
@@ -46,7 +48,8 @@ const Home = () => {
   });
 
   const images = [
-    compraVehiculo,
+    /* compraVehiculo, */
+    compraVehiculo1,
     'https://i.imgur.com/iuAVa9B.png',/* 
     'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=1200&h=600&fit=crop&auto=format&q=80',
     'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=1200&h=600&fit=crop&auto=format&q=80',
@@ -151,7 +154,7 @@ const Home = () => {
   useEffect(() => {
     const timeout = setTimeout(() => {
       setCurrentSlide((prev) => (prev + 1) % images.length);
-    }, 7000);
+    }, 8000);
     return () => clearTimeout(timeout);
   }, [currentSlide]);
 
@@ -223,9 +226,13 @@ const Home = () => {
             <div className="flex transition-transform duration-1000 ease-in-out h-full" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
               {images.map((item, index) => (
                 <div key={index} className="w-full flex-shrink-0 h-full">
-                  {typeof item === 'string' && item.includes('.mp4') ? (
+                  {typeof item === 'string' && (item.includes('.mp4') || item.includes('.webp')) ? (
                     <div className="relative w-full h-full">
-                      <video src={item} className="w-full h-full object-cover" autoPlay muted loop />
+                      {item.includes('webp') ? (
+                        <img src={item} alt={`Slide ${index + 1}`} className="w-full h-full object-cover" />
+                      ) : (
+                        <video src={item} className="w-full h-full object-cover" autoPlay muted loop />
+                      )}                      
                       <div className="absolute inset-0 flex items-center justify-center bg-black/40">
                         <div className="text-center text-white">
                           <h1 className="text-3xl md:text-5xl font-extrabold mb-2 drop-shadow-2xl">
