@@ -750,7 +750,7 @@ const Home = () => {
         {/* Texto compacto y siempre visible */}
         <div className="text-white text-xs font-medium leading-tight">
           <div>¿Servicio en tránsito?</div>
-          <div className="font-bold">Nosotros de ayudamos</div>
+          <div className="font-bold">Nosotros te ayudamos</div>
         </div>
       </a>
 
