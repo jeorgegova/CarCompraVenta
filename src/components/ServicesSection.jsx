@@ -8,6 +8,8 @@ const ServicesCarousel = () => {
   const [isVisible, setIsVisible] = useState(false)
   const [autoPlay, setAutoPlay] = useState(true)
   const sectionRef = useRef(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedService, setSelectedService] = useState(null)
 
   const services = [
     {
@@ -16,6 +18,9 @@ const ServicesCarousel = () => {
       description: "Servicio completo de traspaso de propiedad con toda la documentación requerida.",
       image: "/vehicle-transfer.jpg",
       color: "from-slate-600 to-slate-400",
+      requirements: ["Documento de identidad del vendedor y comprador", "Factura de venta", "SOAT vigente", "Revisión técnico-mecánica"],
+      documentation: ["Registro civil de nacimiento", "Certificado de libertad y tradición", "Paz y salvo municipal"],
+      cost: "$150,000 COP",
     },
     {
       id: 2,
@@ -23,6 +28,9 @@ const ServicesCarousel = () => {
       description: "Liberación de prendas y gravámenes de manera rápida y segura.",
       image: "/lien-release-vehicle.jpg",
       color: "from-slate-500 to-slate-300",
+      requirements: ["Documento de identidad del propietario", "Factura de venta o contrato", "Paz y salvo de la entidad financiera"],
+      documentation: ["Certificado de levantamiento de prenda", "Registro de propiedad vehicular"],
+      cost: "$100,000 COP",
     },
     {
       id: 3,
@@ -30,6 +38,9 @@ const ServicesCarousel = () => {
       description: "Registro de prendas con total seguridad jurídica.",
       image: "/lien-registration.jpg",
       color: "from-slate-700 to-slate-500",
+      requirements: ["Documento de identidad del propietario", "Contrato de prenda", "Factura del vehículo"],
+      documentation: ["Registro de inscripción de prenda", "Certificado de tradición"],
+      cost: "$120,000 COP",
     },
     {
       id: 4,
@@ -37,6 +48,9 @@ const ServicesCarousel = () => {
       description: "Apertura de cuentas bancarias para procesos vehiculares.",
       image: "/bank-account-vehicle.jpg",
       color: "from-slate-600 to-slate-400",
+      requirements: ["Documento de identidad", "Comprobante de ingresos", "Referencias bancarias"],
+      documentation: ["Certificado de apertura de cuenta", "Estado de cuenta inicial"],
+      cost: "$50,000 COP",
     },
     {
       id: 5,
@@ -44,6 +58,9 @@ const ServicesCarousel = () => {
       description: "Servicio de traslado seguro entre diferentes ciudades.",
       image: "/vehicle-transport-service.jpg",
       color: "from-slate-500 to-slate-300",
+      requirements: ["Documento de identidad del propietario", "Factura del vehículo", "SOAT y revisión vigente"],
+      documentation: ["Contrato de traslado", "Póliza de seguro de transporte"],
+      cost: "$200,000 COP (dependiendo de la distancia)",
     },
   ]
 
