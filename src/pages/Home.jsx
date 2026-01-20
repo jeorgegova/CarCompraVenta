@@ -678,7 +678,7 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-white font-semibold mb-4">CarCompraVenta</h3>
+              <h3 className="text-white font-semibold mb-4">ConectaCar</h3>
               <p className="text-sm">Tu plataforma confiable para comprar y vender vehículos en Colombia.</p>
             </div>
             <div>
@@ -716,13 +716,13 @@ const Home = () => {
             </div>
             <div>
               <h4 className="text-white font-semibold mb-4">Contacto</h4>
-              <p className="text-sm">Email: info@carcompraventa.com</p>
+              <p className="text-sm">Email: conectacarcolombia@gmail.com</p>
               <p className="text-sm">Tel: +57 300 620 5493</p>
               <p className="text-sm">Manizales, Caldas Colombia</p>
             </div>
           </div>
           <div id="contact" className="border-t border-gray-700 mt-8 pt-8 text-center text-sm">
-            <p>&copy; 2026 CarCompraVenta. Todos los derechos reservados.</p>
+            <p>&copy; 2026 ConectaCar. Todos los derechos reservados.</p>
           </div>
         </div>
       </footer>

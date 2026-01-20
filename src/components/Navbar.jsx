@@ -165,7 +165,7 @@ const Navbar = () => {
                 to="/"
                 className="text-gray-900 text-xl md:text-2xl font-bold hover:text-gray-700 transition duration-200"
               >
-                CarCompraVenta
+                ConectaCar
               </Link>
 
               {/* Navigation Links - Hidden on mobile, shown on desktop */}
