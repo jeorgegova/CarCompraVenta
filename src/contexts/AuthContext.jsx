@@ -75,7 +75,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('role, first_name, last_name')
+        .select('role, first_name, last_name, email')
         .eq('id', userId)
         .maybeSingle()
       console.log('fetchUserRole: initial query result - data:', data, 'error:', error)

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { supabase } from "../lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
@@ -8,7 +9,7 @@ import "react-medium-image-zoom/dist/styles.css";
 const VehicleDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, runQuery } = useAuth();
+  const { user, profile, runQuery } = useAuth();
 
   const [vehicle, setVehicle] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -71,6 +72,29 @@ const VehicleDetail = () => {
         updated_at: new Date().toISOString(),
       }));
       if (error) throw error;
+
+      // Enviar notificación por correo
+      const userEmail = profile?.email || user?.email;
+      console.log('envia correo a userEmail:', userEmail);
+      if (userEmail) {
+        try {
+          await supabase.functions.invoke('send-email-notification', {
+            body: {
+              to: userEmail,
+              type: "reservation_created",
+              marca: vehicle.brand,
+              modelo: vehicle.model,
+              fecha_reserva: reservationDate.split('-').reverse().join('/'),
+              hora_reserva: reservationTime,
+            }
+          });
+        } catch (emailError) {
+          console.error('Error sending email notification:', emailError);
+          // No bloquear el flujo si falla el email
+        }
+      } else {
+        console.error('No user email available for notification');
+      }
 
       setShowSuccessModal(true);
       setReservationDate("");
@@ -222,11 +246,10 @@ const VehicleDetail = () => {
                   key={i}
                   src={image}
                   alt="thumbnail"
-                  className={`w-full h-24 object-cover rounded-lg cursor-pointer border-2 ${
-                    selectedImage === image
+                  className={`w-full h-24 object-cover rounded-lg cursor-pointer border-2 ${selectedImage === image
                       ? "border-gray-900 scale-105"
                       : "border-transparent hover:scale-105"
-                  } transition-transform duration-200`}
+                    } transition-transform duration-200`}
                   onClick={() => setSelectedImage(image)}
                 />
               ))}
@@ -317,11 +340,10 @@ const VehicleDetail = () => {
           {/* Mensaje de confirmación */}
           {message && (
             <div
-              className={`p-4 text-sm rounded-lg ${
-                message.includes("Error")
+              className={`p-4 text-sm rounded-lg ${message.includes("Error")
                   ? "bg-red-50 text-red-700 border border-red-200"
                   : "bg-green-50 text-green-700 border border-green-200"
-              }`}
+                }`}
             >
               {message}
             </div>
@@ -377,18 +399,16 @@ const VehicleDetail = () => {
                   chatMessages.map((msg) => (
                     <div
                       key={msg.id}
-                      className={`flex ${
-                        msg.sender_id === user.id
+                      className={`flex ${msg.sender_id === user.id
                           ? "justify-end"
                           : "justify-start"
-                      }`}
+                        }`}
                     >
                       <div
-                        className={`max-w-xs px-4 py-2 rounded-lg ${
-                          msg.sender_id === user.id
+                        className={`max-w-xs px-4 py-2 rounded-lg ${msg.sender_id === user.id
                             ? "bg-gray-900 text-white"
                             : "bg-gray-100 text-gray-900"
-                        }`}
+                          }`}
                       >
                         <p>{msg.content}</p>
                       </div>
