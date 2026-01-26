@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { useEffect, useState, useRef } from 'react';
 import AuthModal from './AuthModal';
 import SessionExpiredModal from './SessionExpiredModal';
+import logoCompleto from '../assets/logoCompleto.png';
 
 const Navbar = () => {
   const { user, signOut, userRole, userName, runQuery } = useAuth();
@@ -163,9 +164,9 @@ const Navbar = () => {
             <div className="flex items-center space-x-6">
               <Link
                 to="/"
-                className="text-gray-900 text-xl md:text-2xl font-bold hover:text-gray-700 transition duration-200"
+                className="hover:opacity-80 transition duration-200"
               >
-                ConectaCar
+                <img src={logoCompleto} alt="ConectaCar" className="h-8 w-auto" />
               </Link>
 
               {/* Navigation Links - Hidden on mobile, shown on desktop */}
