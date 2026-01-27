@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useAuth } from '../contexts/AuthContext';
 import VehicleCard from '../components/VehicleCard';
 
@@ -76,7 +77,13 @@ const Vehicles = () => {
   };
 
   return (
-    <div className="min-h-screen font-sans text-gray-900 bg-gray-50">
+    <>
+      <Helmet>
+        <title>Vehículos en Venta - Conecta Car</title>
+        <meta name="description" content="Explora una amplia selección de vehículos usados en Colombia. Encuentra carros de todas las marcas y modelos con filtros avanzados." />
+        <meta name="keywords" content="vehículos usados Colombia, carros en venta, compra venta autos" />
+      </Helmet>
+      <div className="min-h-screen font-sans text-gray-900 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-8">
           <div>
@@ -224,8 +231,9 @@ const Vehicles = () => {
             <p className="text-gray-600">No se encontraron vehículos con los filtros aplicados.</p>
           </div>
         )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

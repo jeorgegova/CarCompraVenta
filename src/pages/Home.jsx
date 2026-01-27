@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { useAuth } from '../contexts/AuthContext';
 import VehicleCard from '../components/VehicleCard';
 import ServicesSection from '../components/ServicesSection';
@@ -216,7 +217,39 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen font-sans text-gray-900 bg-gray-100">
+    <>
+      <Helmet>
+        <title>Conecta Car - Compra y Venta de Vehículos en Colombia</title>
+        <meta name="description" content="Plataforma confiable para compra y venta de vehículos en Colombia. Servicios de traspaso, levantamiento de prenda y más. Acompañamiento personalizado." />
+        <meta name="keywords" content="compra venta carros, vehículos usados Colombia, traspaso vehicular, levantamiento prenda, conecta car" />
+        <meta property="og:title" content="Conecta Car - Compra y Venta de Vehículos" />
+        <meta property="og:description" content="Tu plataforma confiable para comprar y vender vehículos en Colombia con servicios completos de tránsito." />
+        <meta property="og:image" content="/logo.png" />
+        <meta property="og:url" content="https://conectacar.com" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Conecta Car - Compra y Venta de Vehículos" />
+        <meta name="twitter:description" content="Tu plataforma confiable para comprar y vender vehículos en Colombia con servicios completos de tránsito." />
+        <meta name="twitter:image" content="/logo.png" />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "Conecta Car",
+            "url": "https://conectacar.com",
+            "logo": "https://conectacar.com/logo.png",
+            "description": "Plataforma para compra y venta de vehículos en Colombia",
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "telephone": "+57-300-620-5493",
+              "contactType": "customer service",
+              "areaServed": "CO",
+              "availableLanguage": "es"
+            }
+          })}
+        </script>
+      </Helmet>
+      <div className="min-h-screen font-sans text-gray-900 bg-gray-100">
 
       {/* Modern Services Carousel Section */}
       <section className="relative h-[400px] flex items-center overflow-hidden bg-gray-100">
@@ -754,7 +787,8 @@ const Home = () => {
         </div>
       </a>
 
-    </div>
+      </div>
+    </>
   );
 };
 
