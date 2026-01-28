@@ -393,6 +393,116 @@ const Navbar = () => {
         />
       )}
 
+      {/* Mobile Menu */}
+      {showMobileMenu && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowMobileMenu(false)}></div>
+          <div className="absolute top-0 right-0 w-64 bg-white h-full shadow-lg transform transition-transform duration-300 ease-in-out">
+            <div className="flex justify-between items-center p-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">Menú</h2>
+              <button
+                onClick={() => setShowMobileMenu(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="py-4">
+              <button
+                onClick={() => {
+                  if (window.location.pathname !== '/') {
+                    window.location.href = '/#services';
+                  } else {
+                    const servicesSection = document.getElementById('services');
+                    if (servicesSection) {
+                      servicesSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }
+                  setShowMobileMenu(false);
+                }}
+                className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+              >
+                Servicios
+              </button>
+              <button
+                onClick={() => {
+                  if (window.location.pathname !== '/') {
+                    window.location.href = '/#about';
+                  } else {
+                    const aboutSection = document.getElementById('about');
+                    if (aboutSection) {
+                      aboutSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }
+                  setShowMobileMenu(false);
+                }}
+                className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+              >
+                Sobre Nosotros
+              </button>
+              {(userRole === 'buyer' || userRole === 'seller') && (
+                <Link
+                  to="/account"
+                  onClick={() => setShowMobileMenu(false)}
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                >
+                  Mi Cuenta
+                </Link>
+              )}
+              {userRole === 'buyer' && (
+                <Link
+                  to="/chats"
+                  onClick={() => setShowMobileMenu(false)}
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                >
+                  Chats
+                </Link>
+              )}
+              {userRole === 'seller' && (
+                <Link
+                  to="/seller"
+                  onClick={() => setShowMobileMenu(false)}
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                >
+                  Panel Vendedor
+                </Link>
+              )}
+              {userRole === 'admin' && (
+                <>
+                  <Link
+                    to="/admin"
+                    onClick={() => setShowMobileMenu(false)}
+                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  >
+                    Panel Admin
+                  </Link>
+                  <Link
+                    to="/admin/chats"
+                    onClick={() => setShowMobileMenu(false)}
+                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  >
+                    Chats
+                  </Link>
+                </>
+              )}
+              <div className="border-t border-gray-200 mt-4 pt-4">
+                <button
+                  onClick={() => {
+                    handleSignOut();
+                    setShowMobileMenu(false);
+                  }}
+                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                >
+                  Cerrar Sesión
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Session Expired Modal */}
       {showSessionExpiredModal && (
         <SessionExpiredModal
