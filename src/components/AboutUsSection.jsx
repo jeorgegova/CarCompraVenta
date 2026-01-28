@@ -46,7 +46,7 @@ const AboutUsSection = () => {
     <section
       id="about"
       ref={ref}
-      className="py-20 px-6 bg-gradient-to-b from-white to-gray-50 overflow-hidden"
+      className="py-12 sm:py-20 px-6 bg-gradient-to-b from-white to-gray-50 overflow-hidden"
     >
       <div className="max-w-6xl mx-auto">
         {/* Header */}
@@ -58,14 +58,14 @@ const AboutUsSection = () => {
         >
           <motion.h2
             variants={itemVariants}
-            className="text-5xl md:text-6xl font-bold text-gray-900 mb-4 tracking-tight"
+            className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-4 tracking-tight"
             style={{ fontFamily: "system-ui, sans-serif" }}
           >
             Sobre Nosotros
           </motion.h2>
           <motion.p
             variants={itemVariants}
-            className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed"
+            className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed"
           >
             Conoce nuestra misión y visión que nos guían en cada paso para ofrecerte el mejor servicio
           </motion.p>
@@ -88,12 +88,12 @@ const AboutUsSection = () => {
             className="group bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-2xl hover:border-gray-200 transition-all duration-500"
           >
             <div className="flex items-center mb-6">
-              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center mr-4 shadow-md">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center mr-4 shadow-md">
                 <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900">Misión</h3>
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Misión</h3>
             </div>
             <p className="text-gray-700 leading-relaxed mb-3">
               Brindar acompañamiento profesional, transparente y humano a las personas que compran o venden su
@@ -112,7 +112,7 @@ const AboutUsSection = () => {
               y: -8,
               transition: { duration: 0.3, ease: "easeOut" },
             }}
-            className="group bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-2xl hover:border-gray-200 transition-all duration-500"
+            className="group bg-white rounded-2xl p-6 sm:p-8 shadow-lg border border-gray-100 hover:shadow-2xl hover:border-gray-200 transition-all duration-500"
           >
             <div className="flex items-center mb-6">
               <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center mr-4 shadow-md">
@@ -121,7 +121,7 @@ const AboutUsSection = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900">Visión</h3>
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Visión</h3>
             </div>
             <p className="text-gray-700 leading-relaxed mb-3">
               Ser reconocidos como la asesoría automotriz más confiable y humana, referente en el acompañamiento
@@ -152,7 +152,7 @@ const AboutUsSection = () => {
           </motion.p>
 
           {/* Valores + separadores en el orden correcto */}
-          <div className="flex flex-wrap items-center justify-center gap-x-4 md:gap-x-6">
+          <div className="flex flex-wrap items-center justify-center gap-x-2 sm:gap-x-4 md:gap-x-6">
             {["Compromiso", "Confianza", "Excelencia"].map((valor, index) => (
               <motion.span
                 key={valor}
@@ -163,7 +163,7 @@ const AboutUsSection = () => {
                   duration: 0.7,
                   ease: "easeOut",
                 }}
-                className="text-lg md:text-xl font-bold text-gray-800 inline-flex items-center"
+                className="text-base sm:text-lg md:text-xl font-bold text-gray-800 inline-flex items-center"
                 style={{ fontFamily: "system-ui, sans-serif" }}
               >
                 {valor}
@@ -177,7 +177,7 @@ const AboutUsSection = () => {
                       duration: 0.5,
                       ease: "backOut",
                     }}
-                    className="mx-3 md:mx-4 text-gray-400 text-xl"
+                    className="mx-2 sm:mx-3 md:mx-4 text-gray-400 text-xl"
                   >
                     •
                   </motion.span>

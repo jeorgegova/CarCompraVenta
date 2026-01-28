@@ -35,7 +35,7 @@ const VehicleCard = ({ vehicle }) => {
     >
       <div className="relative overflow-hidden">
         {images.length > 0 ? (
-          <div className="relative w-full h-48">
+          <div className="relative w-full h-40 sm:h-48">
             {images.map((image, index) => (
               <img
                 key={index}
@@ -52,7 +52,7 @@ const VehicleCard = ({ vehicle }) => {
             ))}
           </div>
         ) : (
-          <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+          <div className="w-full h-40 sm:h-48 bg-gray-200 flex items-center justify-center">
             <span className="text-gray-400 text-3xl">🚗</span>
           </div>
         )}
@@ -64,7 +64,7 @@ const VehicleCard = ({ vehicle }) => {
                 e.preventDefault();
                 prevImage();
               }}
-              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-1 rounded-full hover:bg-opacity-75 transition-all duration-300 ease-in-out opacity-0 group-hover:opacity-100"
+              className="absolute left-1 sm:left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-0.5 sm:p-1 rounded-full hover:bg-opacity-75 transition-all duration-300 ease-in-out opacity-0 group-hover:opacity-100"
             >
               ‹
             </button>
@@ -73,15 +73,15 @@ const VehicleCard = ({ vehicle }) => {
                 e.preventDefault();
                 nextImage();
               }}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-1 rounded-full hover:bg-opacity-75 transition-all duration-300 ease-in-out opacity-0 group-hover:opacity-100"
+              className="absolute right-1 sm:right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-0.5 sm:p-1 rounded-full hover:bg-opacity-75 transition-all duration-300 ease-in-out opacity-0 group-hover:opacity-100"
             >
               ›
             </button>
-            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1 transition-all duration-300 ease-in-out opacity-0 group-hover:opacity-100">
+            <div className="absolute bottom-1 sm:bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-0.5 sm:space-x-1 transition-all duration-300 ease-in-out opacity-0 group-hover:opacity-100">
               {images.map((_, index) => (
                 <div
                   key={index}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ease-in-out ${
+                  className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all duration-300 ease-in-out ${
                     index === currentImageIndex ? 'bg-white' : 'bg-white bg-opacity-50'
                   }`}
                 />
@@ -90,11 +90,11 @@ const VehicleCard = ({ vehicle }) => {
           </>
         )}
       </div>
-      <div className="p-4">
-        <h3 className="font-medium text-gray-900 mb-1 text-sm">
+      <div className="p-3 sm:p-4">
+        <h3 className="font-medium text-gray-900 mb-1 text-xs sm:text-sm">
           {vehicle.brand} {vehicle.model} {vehicle.year}
         </h3>
-        <p className="text-xl font-bold text-green-600 mb-2">
+        <p className="text-lg sm:text-xl font-bold text-green-600 mb-2">
           ${vehicle.price?.toLocaleString()}
         </p>
         <div className="text-xs text-gray-600 space-y-1">

@@ -85,14 +85,14 @@ const Vehicles = () => {
       </Helmet>
       <div className="min-h-screen font-sans text-gray-900 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Vehículos Disponibles</h1>
             <p className="text-gray-600 mt-2">Encuentra el vehículo perfecto para ti</p>
           </div>
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+            className="bg-gray-900 hover:bg-gray-800 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg font-medium transition-colors self-start sm:self-auto"
           >
             {showFilters ? 'Ocultar Filtros' : 'Mostrar Filtros'}
           </button>

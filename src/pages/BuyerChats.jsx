@@ -183,16 +183,16 @@ const BuyerChats = () => {
 
   return (
     <div className="min-h-screen font-sans text-gray-900 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <div className="bg-gray-900 text-white px-6 py-4">
-            <h1 className="text-2xl font-bold">Mis Chats</h1>
+          <div className="bg-gray-900 text-white px-4 sm:px-6 py-4">
+            <h1 className="text-xl sm:text-2xl font-bold">Mis Chats</h1>
             <p className="text-gray-300">Conversaciones sobre vehículos de interés</p>
           </div>
 
-          <div className="flex h-[600px]">
+          <div className="flex flex-col sm:flex-row h-[400px] sm:h-[600px]">
             {/* Conversations List */}
-            <div className="w-1/3 border-r border-gray-200 overflow-y-auto">
+            <div className="w-full sm:w-1/3 border-r border-gray-200 sm:border-r overflow-y-auto">
               <div className="p-4 border-b border-gray-200">
                 <h2 className="text-lg font-semibold text-gray-900">Conversaciones</h2>
               </div>

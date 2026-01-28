@@ -490,11 +490,11 @@ const AdminEditVehicle = () => {
 
   return (
     <div className="min-h-screen font-sans text-gray-900 bg-gray-50">
-      <div className="max-w-2xl mx-auto py-8">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Editar Vehículo</h2>
+      <div className="max-w-2xl mx-auto py-6 sm:py-8">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-8">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Editar Vehículo</h2>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             {message && (
               <div className={`p-4 rounded-lg text-sm ${message.includes('Error') ? 'bg-red-50 border border-red-200 text-red-700' : 'bg-green-50 border border-green-200 text-green-700'}`}>
                 {message}
@@ -524,11 +524,11 @@ const AdminEditVehicle = () => {
             )}
 
             {/* Campos del formulario */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Marca *</label>
                 <input type="text" name="brand" required value={formData.brand} onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500" placeholder="Ej: Toyota" />
+                  className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500" placeholder="Ej: Toyota" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Modelo *</label>
@@ -627,12 +627,12 @@ const AdminEditVehicle = () => {
               {currentImages.length > 0 ? (
                 <div className="space-y-4">
                   <p className="text-sm text-gray-500">Haz clic en × para remover una imagen.</p>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4">
                     {currentImages.map((preview, i) => (
                       <div key={i} className="relative group">
-                        <img src={preview} alt="" className="w-full h-24 object-cover rounded-lg border" />
+                        <img src={preview} alt="" className="w-full h-20 sm:h-24 object-cover rounded-lg border" />
                         <button type="button" onClick={() => removeCurrentImage(i)}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 text-xs opacity-0 group-hover:opacity-100 transition">
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 sm:w-6 sm:h-6 text-xs opacity-0 group-hover:opacity-100 transition">
                           ×
                         </button>
                       </div>
@@ -654,12 +654,12 @@ const AdminEditVehicle = () => {
                 {newImagePreviews.length > 0 && (
                   <div className="space-y-2">
                     <p className="text-sm font-medium text-gray-700">Previsualización de nuevas imágenes:</p>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4">
                       {newImagePreviews.map((preview, i) => (
                         <div key={i} className="relative group">
-                          <img src={preview} alt="" className="w-full h-24 object-cover rounded-lg border" />
+                          <img src={preview} alt="" className="w-full h-20 sm:h-24 object-cover rounded-lg border" />
                           <button type="button" onClick={() => removeImage(i)}
-                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 text-xs opacity-0 group-hover:opacity-100 transition">
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 sm:w-6 sm:h-6 text-xs opacity-0 group-hover:opacity-100 transition">
                             ×
                           </button>
                         </div>
@@ -671,7 +671,7 @@ const AdminEditVehicle = () => {
             </div>
 
             <button type="submit" disabled={updating}
-              className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3 px-4 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+              className="w-full bg-gray-900 hover:bg-gray-800 text-white py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
               {updating ? (
                 <span className="flex items-center justify-center">
                   <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -686,13 +686,13 @@ const AdminEditVehicle = () => {
             </button>
 
             <div className="mt-6 pt-6 border-t border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Acciones Administrativas</h3>
-              <div className="flex space-x-4">
+              <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-4">Acciones Administrativas</h3>
+              <div className="flex space-x-2 sm:space-x-4">
                 {vehicleStatus === 'pending' ? (
                   <button
                     type="button"
                     onClick={approvePublication}
-                    className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-medium transition-colors"
+                    className="bg-green-600 hover:bg-green-700 text-white py-1 px-3 sm:py-2 sm:px-4 rounded-lg font-medium transition-colors"
                   >
                     Aprobar Publicación
                   </button>
@@ -700,7 +700,7 @@ const AdminEditVehicle = () => {
                   <button
                     type="button"
                     onClick={changeStatusToPending}
-                    className="bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded-lg font-medium transition-colors"
+                    className="bg-yellow-600 hover:bg-yellow-700 text-white py-1 px-3 sm:py-2 sm:px-4 rounded-lg font-medium transition-colors"
                   >
                     Cambiar a Pendiente
                   </button>
@@ -712,7 +712,7 @@ const AdminEditVehicle = () => {
                     '¿Estás seguro de que quieres eliminar este vehículo? Esta acción no se puede deshacer y eliminará también todas las imágenes asociadas.',
                     'delete'
                   )}
-                  className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg font-medium transition-colors"
+                  className="bg-red-600 hover:bg-red-700 text-white py-1 px-3 sm:py-2 sm:px-4 rounded-lg font-medium transition-colors"
                 >
                   Eliminar Vehículo
                 </button>

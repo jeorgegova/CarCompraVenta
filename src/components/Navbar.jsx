@@ -17,6 +17,7 @@ const Navbar = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState('login'); // 'login' or 'register'
   const [showSessionExpiredModal, setShowSessionExpiredModal] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const fetchInProgressRef = useRef(false);
 
   useEffect(() => {
@@ -159,18 +160,18 @@ const Navbar = () => {
     <>
       <nav className="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center h-14 sm:h-16">
             {/* Logo and Navigation Links */}
-            <div className="flex items-center space-x-6">
+            <div className="flex items-center space-x-4 sm:space-x-6">
               <Link
                 to="/"
                 className="hover:opacity-80 transition duration-200"
               >
-                <img src={logoCompleto} alt="ConectaCar" className="h-8 w-auto" />
+                <img src={logoCompleto} alt="ConectaCar" className="h-6 sm:h-8 w-auto" />
               </Link>
 
               {/* Navigation Links - Hidden on mobile, shown on desktop */}
-              <div className="hidden md:flex items-center space-x-4">
+              <div className="hidden md:flex items-center space-x-2 sm:space-x-4">
                 <button
                   onClick={() => {
                     if (window.location.pathname !== '/') {
@@ -199,7 +200,7 @@ const Navbar = () => {
                       }
                     }
                   }}
-                  className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition duration-200 relative group"
+                  className="text-gray-700 hover:text-gray-900 px-2 py-1 sm:px-3 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition duration-200 relative group"
                 >
                   Sobre Nosotros
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gray-900 group-hover:w-full transition-all duration-200"></span>
@@ -208,13 +209,13 @@ const Navbar = () => {
             </div>
 
             {/* User Menu */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               {user ? (
                 <>
                   {/* Mobile menu button */}
                   <div className="md:hidden">
                     <button
-                      onClick={() => setShowNotifications(!showNotifications)}
+                      onClick={() => setShowMobileMenu(!showMobileMenu)}
                       className="text-gray-700 hover:text-gray-900 p-2"
                     >
                       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -224,7 +225,7 @@ const Navbar = () => {
                   </div>
 
                   {/* Desktop user menu */}
-                  <div className="hidden md:flex items-center space-x-4">
+                  <div className="hidden md:flex items-center space-x-2 sm:space-x-4">
                     {(userRole === 'buyer' || userRole === 'seller') && (
                       <Link
                         to="/account"
@@ -253,7 +254,7 @@ const Navbar = () => {
                         </button>
 
                         {showNotifications && (
-                          <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                          <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                             <div className="p-4 border-b border-gray-200">
                               <h3 className="text-sm font-medium text-gray-900">Mensajes</h3>
                             </div>
@@ -349,7 +350,7 @@ const Navbar = () => {
 
                     <button
                       onClick={handleSignOut}
-                      className="text-gray-700 hover:text-gray-900 px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 hover:border-gray-400 transition duration-200"
+                      className="text-gray-700 hover:text-gray-900 px-3 py-1 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-medium border border-gray-300 hover:border-gray-400 transition duration-200"
                     >
                       Cerrar Sesión
                     </button>
@@ -372,7 +373,7 @@ const Navbar = () => {
                       setAuthMode('register');
                       setShowAuthModal(true);
                     }}
-                    className="bg-gray-900 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transform hover:scale-105 transition duration-200 shadow-md"
+                    className="bg-gray-900 text-white px-4 py-1 sm:px-6 sm:py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-gray-800 transform hover:scale-105 transition duration-200 shadow-md"
                   >
                     Registrarse
                   </button>

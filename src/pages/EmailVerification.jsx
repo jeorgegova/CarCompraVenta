@@ -69,7 +69,7 @@ const EmailVerification = () => {
       <div className="w-full max-w-md">
         <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-gray-100/60 overflow-hidden transition-all duration-500">
           {/* Header */}
-          <div className="bg-gray-900 px-8 py-10 text-white text-center">
+          <div className="bg-gray-900 px-6 sm:px-8 py-10 text-white text-center">
             <h1 className="text-3xl font-bold tracking-tight">ConectaCar</h1>
             <p className="mt-2 text-blue-100/90 text-sm font-medium">
               {type === 'recovery' ? 'Restablecimiento de contraseña' : 'Verificación de cuenta'}
@@ -77,7 +77,7 @@ const EmailVerification = () => {
           </div>
 
           {/* Contenido principal */}
-          <div className="p-8 md:p-10 text-center">
+          <div className="p-6 sm:p-8 md:p-10 text-center">
             {type === 'loading' && (
               <div className="my-10 flex justify-center">
                 <div className="w-14 h-14 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin" />

@@ -220,11 +220,11 @@ const AdminUploadVehicle = () => {
 
   return (
     <div className="min-h-screen font-sans text-gray-900 bg-gray-50">
-      <div className="max-w-2xl mx-auto py-8">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Crear Nuevo Vehículo</h2>
+      <div className="max-w-2xl mx-auto py-6 sm:py-8">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-8">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Crear Nuevo Vehículo</h2>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             {message && (
               <div className={`p-4 rounded-lg text-sm ${message.includes('Error') ? 'bg-red-50 border border-red-200 text-red-700' : 'bg-green-50 border border-green-200 text-green-700'}`}>
                 {message}
@@ -233,18 +233,18 @@ const AdminUploadVehicle = () => {
 
             {showSuccessModal && (
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                <div className="bg-white rounded-lg p-4 sm:p-6 max-w-md w-full mx-4">
                   <div className="text-center">
-                    <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
-                      <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="mx-auto flex items-center justify-center h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-green-100 mb-4">
+                      <svg className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">¡Vehículo publicado exitosamente!</h3>
+                    <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">¡Vehículo publicado exitosamente!</h3>
                     <p className="text-sm text-gray-500 mb-4">El vehículo ha sido aprobado y está disponible para los compradores.</p>
                     <button
                       onClick={() => setShowSuccessModal(false)}
-                      className="w-full bg-gray-900 hover:bg-gray-800 text-white py-2 px-4 rounded-lg font-medium transition-colors"
+                      className="w-full bg-gray-900 hover:bg-gray-800 text-white py-1 sm:py-2 px-3 sm:px-4 rounded-lg font-medium transition-colors"
                     >
                       Aceptar
                     </button>
@@ -254,7 +254,7 @@ const AdminUploadVehicle = () => {
             )}
 
             {/* Campos del formulario - igual que UploadVehicle */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Marca *</label>
                 <input type="text" name="brand" required value={formData.brand} onChange={handleChange}
@@ -362,12 +362,12 @@ const AdminUploadVehicle = () => {
                 {imagePreviews.length > 0 && (
                   <div className="space-y-2">
                     <p className="text-sm font-medium text-gray-700">Previsualización:</p>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4">
                       {imagePreviews.map((preview, i) => (
                         <div key={i} className="relative group">
-                          <img src={preview} alt="" className="w-full h-24 object-cover rounded-lg border" />
+                          <img src={preview} alt="" className="w-full h-20 sm:h-24 object-cover rounded-lg border" />
                           <button type="button" onClick={() => removeImage(i)}
-                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 text-xs opacity-0 group-hover:opacity-100 transition">
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 sm:w-6 sm:h-6 text-xs opacity-0 group-hover:opacity-100 transition">
                             ×
                           </button>
                         </div>
@@ -379,7 +379,7 @@ const AdminUploadVehicle = () => {
             </div>
 
             <button type="submit" disabled={uploading}
-              className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3 px-4 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+              className="w-full bg-gray-900 hover:bg-gray-800 text-white py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
               {uploading ? (
                 <span className="flex items-center justify-center">
                   <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

@@ -252,7 +252,7 @@ const Home = () => {
       <div className="min-h-screen font-sans text-gray-900 bg-gray-100">
 
       {/* Modern Services Carousel Section */}
-      <section className="relative h-[400px] flex items-center overflow-hidden bg-gray-100">
+      <section className="relative h-[300px] sm:h-[400px] flex items-center overflow-hidden bg-gray-100">
         {/* Contenido principal con blur suave */}
         <div className="relative z-10 w-full h-full">
           <div className="w-full h-full relative overflow-hidden">
@@ -657,7 +657,7 @@ const Home = () => {
             `}</style>
             <div className="flex gap-6 animate-scroll">
               {[...testimonials, ...testimonials].map((testimonial, index) => (
-                <div key={index} className="group relative flex-shrink-0 w-[500px]">
+                <div key={index} className="group relative flex-shrink-0 w-[90vw] max-w-[500px]">
                   <div className="flex items-center gap-4">
                     {/* Image with background square - more compact */}
                     <div className="relative flex-shrink-0">

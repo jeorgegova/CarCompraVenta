@@ -230,7 +230,7 @@ const VehicleDetail = () => {
                 key={selectedImage}
                 src={selectedImage}
                 alt={`${vehicle.brand} ${vehicle.model}`}
-                className="opacity-0 w-full h-[450px] object-cover rounded-2xl"
+                className="opacity-0 w-full h-[300px] sm:h-[450px] object-cover rounded-2xl"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}
@@ -240,7 +240,7 @@ const VehicleDetail = () => {
 
           {/* Miniaturas */}
           {vehicle.images?.length > 1 && (
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
               {vehicle.images.map((image, i) => (
                 <motion.img
                   key={i}
@@ -268,7 +268,7 @@ const VehicleDetail = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="bg-white p-4 rounded-xl shadow-sm border">
               <h3 className="font-semibold">Kilometraje</h3>
               <p>{vehicle.mileage?.toLocaleString()} km</p>

@@ -159,7 +159,7 @@ const ServicesCarousel = () => {
 
       <section
         ref={sectionRef}
-        className="relative w-full py-16 bg-gradient-to-b from-white via-gray-50 to-white overflow-hidden"
+        className="relative w-full py-12 sm:py-16 bg-gradient-to-b from-white via-gray-50 to-white overflow-hidden"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-12 text-center">
@@ -171,13 +171,13 @@ const ServicesCarousel = () => {
               <span className="inline-block text-xs font-semibold text-slate-600 tracking-widest uppercase mb-4 px-4 py-2 bg-slate-100 rounded-full">
                 Nuestros Servicios
               </span>
-              <h2 className="text-6xl md:text-7xl font-light text-gray-900 mb-6 tracking-tight">
+              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-gray-900 mb-6 tracking-tight">
                 Soluciones{" "}
                 <span className="font-bold bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent">
                   Vehiculares
                 </span>
               </h2>
-              <p className="text-xl text-gray-600 font-light max-w-2xl mx-auto leading-relaxed">
+              <p className="text-lg sm:text-xl text-gray-600 font-light max-w-2xl mx-auto leading-relaxed">
                 Experiencia y confianza en cada trámite
               </p>
             </div>
@@ -189,7 +189,7 @@ const ServicesCarousel = () => {
             onMouseLeave={() => setTimeout(() => setAutoPlay(true), 2000)}
           >
             {/* Main Carousel */}
-            <div className="relative h-72 md:h-80 lg:h-96 mb-12 rounded-3xl overflow-hidden shadow-2xl">
+            <div className="relative h-64 sm:h-72 md:h-80 lg:h-96 mb-12 rounded-3xl overflow-hidden shadow-2xl">
               {services.map((service, idx) => (
                 <div
                   key={service.id}
@@ -210,14 +210,14 @@ const ServicesCarousel = () => {
 
                   {/* Content Container */}
                   <div
-                    className={`absolute inset-0 flex flex-col justify-end p-6 md:p-8 lg:p-10 transition-all duration-700 ${
+                    className={`absolute inset-0 flex flex-col justify-end p-4 sm:p-6 md:p-8 lg:p-10 transition-all duration-700 ${
                       idx === currentSlide ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
                     } carousel-slide-content`}
                   >
                     <div className="max-w-xl">
-                      <h3 className="text-4xl md:text-5xl font-bold text-white mb-3 leading-tight">{service.title}</h3>
+                      <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-3 leading-tight">{service.title}</h3>
                       <p className="text-base text-gray-100 font-light mb-6 line-clamp-2">{service.description}</p>
-                      <button className="bg-white text-slate-900 px-6 py-2 rounded-full font-semibold hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                      <button className="bg-white text-slate-900 px-4 py-1 sm:px-6 sm:py-2 rounded-full font-semibold hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
                         Conocer Más
                       </button>
                     </div>
@@ -225,13 +225,13 @@ const ServicesCarousel = () => {
                 </div>
               ))}
 
-              <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-6 md:px-8 pointer-events-none">
+              <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-4 sm:px-6 md:px-8 pointer-events-none">
                 <button
                   onClick={handlePrev}
                   className="pointer-events-auto p-3 rounded-full bg-white/20 hover:bg-white/40 text-white transition-all duration-300 backdrop-blur-md border border-white/20 hover:border-white/40 group"
                   aria-label="Anterior"
                 >
-                  <ChevronLeft className="w-6 h-6 group-hover:scale-110 transition-transform duration-300" />
+                  <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 group-hover:scale-110 transition-transform duration-300" />
                 </button>
 
                 <button
@@ -239,7 +239,7 @@ const ServicesCarousel = () => {
                   className="pointer-events-auto p-3 rounded-full bg-white/20 hover:bg-white/40 text-white transition-all duration-300 backdrop-blur-md border border-white/20 hover:border-white/40 group"
                   aria-label="Siguiente"
                 >
-                  <ChevronRight className="w-6 h-6 group-hover:scale-110 transition-transform duration-300" />
+                  <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 group-hover:scale-110 transition-transform duration-300" />
                 </button>
               </div>
             </div>
@@ -253,8 +253,8 @@ const ServicesCarousel = () => {
                     onClick={() => goToSlide(index)}
                     className={`transition-all duration-300 rounded-full cursor-pointer ${
                       index === currentSlide
-                        ? "w-12 h-3 bg-gradient-to-r from-slate-700 to-slate-900 shadow-md indicator-active"
-                        : "w-3 h-3 bg-gray-300 hover:bg-slate-400"
+                        ? "w-8 h-2 sm:w-12 sm:h-3 bg-gradient-to-r from-slate-700 to-slate-900 shadow-md indicator-active"
+                        : "w-2 h-2 sm:w-3 sm:h-3 bg-gray-300 hover:bg-slate-400"
                     }`}
                     aria-label={`Ir a slide ${index + 1}`}
                   />
