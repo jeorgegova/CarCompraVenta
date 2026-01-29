@@ -138,6 +138,14 @@ CREATE POLICY "Admins can update all vehicles" ON vehicles
     )
   );
 
+CREATE POLICY "Admins can delete all vehicles" ON vehicles
+  FOR DELETE USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+
 -- Reservations policies
 CREATE POLICY "Users can view their own reservations" ON reservations
   FOR SELECT USING (user_id = auth.uid());

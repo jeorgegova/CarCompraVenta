@@ -444,25 +444,19 @@ const AdminEditVehicle = () => {
     });
   };
 
-  const executeAction = async () => {
-    const { action } = confirmModal;
-    closeConfirmModal();
-
-    if (action === 'delete') {
-      await deleteVehicle();
-    }
+  const getStoragePath = (url) => {
+    const parts = url.split('/storage/v1/object/public/');
+    return parts[1]; // vehicles/vehicle-images/imagen.png
   };
 
   const deleteVehicle = async () => {
     try {
+      console.log('Deleting vehicle with ID:', id, currentImages);
       // Delete images from storage if any
       if (currentImages.length > 0) {
         for (const imageUrl of currentImages) {
-          // Extract file name from URL
-          const fileName = imageUrl.split('/').pop();
-          if (fileName) {
-            await supabase.storage.from('vehicle-images').remove([fileName]);
-          }
+          const path = getStoragePath(imageUrl);
+          await supabase.storage.from('vehicles').remove([path.replace('vehicles/', '')]);
         }
       }
 
@@ -477,6 +471,15 @@ const AdminEditVehicle = () => {
     } catch (error) {
       console.error('Error deleting vehicle:', error);
       setMessage('Error al eliminar el vehículo.');
+    }
+  };
+
+  const executeAction = async () => {
+    const { action } = confirmModal;
+    closeConfirmModal();
+
+    if (action === 'delete') {
+      await deleteVehicle();
     }
   };
 
