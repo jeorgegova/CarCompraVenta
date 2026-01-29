@@ -118,9 +118,9 @@ const AdminEditVehicle = () => {
     for (const file of files) {
       const compressed = await compressImage(file);
       const fileName = `vehicle-${Date.now()}-${Math.random()}.jpg`;
-      const { error } = await supabase.storage.from('vehicle-images').upload(fileName, compressed);
+      const { error } = await supabase.storage.from('vehicles').upload(`vehicle-images/${fileName}`, compressed);
       if (error) throw error;
-      const { data: urlData } = supabase.storage.from('vehicle-images').getPublicUrl(fileName);
+      const { data: urlData } = supabase.storage.from('vehicles').getPublicUrl(`vehicle-images/${fileName}`);
       urls.push(urlData.publicUrl);
     }
     return urls;
@@ -224,6 +224,14 @@ const AdminEditVehicle = () => {
     }
 
     try {
+      // Eliminar imágenes removidas del storage
+      if (removedImages.length > 0) {
+        for (const imageUrl of removedImages) {
+          const path = getStoragePath(imageUrl);
+          await supabase.storage.from('vehicles').remove([path.replace('vehicles/', '')]);
+        }
+      }
+
       // Subir nuevas imágenes
       let newUrls = [];
       if (newImageFiles.length > 0) {
@@ -253,6 +261,12 @@ const AdminEditVehicle = () => {
 
       if (error) throw error;
 
+      // Actualizar estado de imágenes actuales
+      setCurrentImages(updatedImages);
+      // Limpiar estados después de actualización exitosa
+      setNewImageFiles([]);
+      setNewImagePreviews([]);
+      setRemovedImages([]);
       setShowSuccessModal(true);
     } catch (error) {
       console.error('Error updating vehicle:', error);
@@ -335,6 +349,10 @@ const AdminEditVehicle = () => {
 
       if (error) throw error;
 
+      // Limpiar estados después de actualización exitosa
+      setNewImageFiles([]);
+      setNewImagePreviews([]);
+      setRemovedImages([]);
       navigate('/admin');
     } catch (error) {
       console.error('Error changing status:', error);
@@ -386,6 +404,14 @@ const AdminEditVehicle = () => {
     }
 
     try {
+      // Eliminar imágenes removidas del storage
+      if (removedImages.length > 0) {
+        for (const imageUrl of removedImages) {
+          const path = getStoragePath(imageUrl);
+          await supabase.storage.from('vehicles').remove([path.replace('vehicles/', '')]);
+        }
+      }
+
       // Subir nuevas imágenes
       let newUrls = [];
       if (newImageFiles.length > 0) {
@@ -417,6 +443,12 @@ const AdminEditVehicle = () => {
 
       if (error) throw error;
 
+      // Actualizar estado de imágenes actuales
+      setCurrentImages(updatedImages);
+      // Limpiar estados después de actualización exitosa
+      setNewImageFiles([]);
+      setNewImagePreviews([]);
+      setRemovedImages([]);
       navigate('/admin/vehicles');
     } catch (error) {
       console.error('Error approving publication:', error);
