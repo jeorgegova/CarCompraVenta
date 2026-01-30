@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   const { user, loading, userRole, roleLoading } = useAuth();
   const [emailConfirmed, setEmailConfirmed] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (user) {
@@ -59,7 +60,7 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
             </div>
             <div className="mt-6">
               <button
-                onClick={() => window.location.href = '/'}
+                onClick={() => navigate('/')}
                 className="font-medium text-primary-600 hover:text-primary-500"
               >
                 Volver al inicio

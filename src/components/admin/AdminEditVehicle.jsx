@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useParams, useNavigate } from 'react-router-dom';
+import heic2any from 'heic2any';
 
 const AdminEditVehicle = () => {
   const { id } = useParams();
@@ -86,9 +87,35 @@ const AdminEditVehicle = () => {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   };
 
+  // Verificar si es archivo HEIC/HEIF
+  const isHeicFile = (file) => {
+    const fileName = file.name.toLowerCase();
+    const fileType = file.type.toLowerCase();
+    return fileName.endsWith('.heic') ||
+           fileName.endsWith('.heif') ||
+           fileType === 'image/heic' ||
+           fileType === 'image/heif';
+  };
+
+  // Convertir HEIC a JPEG
+  const convertHeicToJpeg = async (file) => {
+    try {
+      const convertedBlob = await heic2any({
+        blob: file,
+        toType: 'image/jpeg',
+        quality: 0.8
+      });
+      const newFileName = file.name.replace(/\.heic$/i, '.jpg').replace(/\.heif$/i, '.jpg');
+      return new File([convertedBlob], newFileName, { type: 'image/jpeg' });
+    } catch (error) {
+      console.error('Error converting HEIC:', error);
+      throw error;
+    }
+  };
+
   // Comprimir imagen
   const compressImage = (file, maxWidth = 1200, maxHeight = 900, quality = 0.8) => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       const img = new Image();
@@ -107,16 +134,31 @@ const AdminEditVehicle = () => {
         ctx.drawImage(img, 0, 0, width, height);
         canvas.toBlob((blob) => {
           if (blob) resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+          else reject(new Error('Failed to create blob'));
         }, 'image/jpeg', quality);
       };
+      img.onerror = () => reject(new Error('Failed to load image'));
       img.src = URL.createObjectURL(file);
     });
+  };
+
+  // Procesar imagen (convertir HEIC si es necesario y luego comprimir)
+  const processImage = async (file) => {
+    let processedFile = file;
+    
+    // Si es HEIC, convertir primero a JPEG
+    if (isHeicFile(file)) {
+      processedFile = await convertHeicToJpeg(file);
+    }
+    
+    // Luego comprimir
+    return await compressImage(processedFile);
   };
 
   const uploadImages = async (files) => {
     const urls = [];
     for (const file of files) {
-      const compressed = await compressImage(file);
+      const compressed = await processImage(file);
       const fileName = `vehicle-${Date.now()}-${Math.random()}.jpg`;
       const { error } = await supabase.storage.from('vehicles').upload(`vehicle-images/${fileName}`, compressed);
       if (error) throw error;
@@ -129,24 +171,27 @@ const AdminEditVehicle = () => {
   const handleImageSelect = async (e) => {
     const files = Array.from(e.target.files);
     const previews = [];
-    const compressedFiles = [];
+    const processedFiles = [];
 
     for (const file of files) {
-      if (file.type.startsWith('image/')) {
+      // Aceptar imágenes estándar y archivos HEIC/HEIF
+      if (file.type.startsWith('image/') || isHeicFile(file)) {
         try {
-          const compressedFile = await compressImage(file);
-          const previewUrl = URL.createObjectURL(compressedFile);
+          const processedFile = await processImage(file);
+          const previewUrl = URL.createObjectURL(processedFile);
           previews.push(previewUrl);
-          compressedFiles.push(compressedFile);
-        } catch {
+          processedFiles.push(processedFile);
+        } catch (error) {
+          console.error('Error processing image:', error);
+          // Si falla el procesamiento, intentar usar el archivo original
           const previewUrl = URL.createObjectURL(file);
           previews.push(previewUrl);
-          compressedFiles.push(file);
+          processedFiles.push(file);
         }
       }
     }
 
-    setNewImageFiles((prev) => [...prev, ...compressedFiles]);
+    setNewImageFiles((prev) => [...prev, ...processedFiles]);
     setNewImagePreviews((prev) => [...prev, ...previews]);
   };
 
@@ -682,9 +727,9 @@ const AdminEditVehicle = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Agregar nuevas imágenes</label>
               <div className="space-y-4">
-                <input type="file" multiple accept="image/*" onChange={handleImageSelect}
+                <input type="file" multiple accept="image/*,.heic,.heif" onChange={handleImageSelect}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500" />
-                <p className="text-sm text-gray-500">Las imágenes se comprimirán automáticamente.</p>
+                <p className="text-sm text-gray-500">Las imágenes se comprimirán automáticamente. Formatos soportados: JPG, PNG, WEBP, HEIC (Samsung).</p>
 
                 {newImagePreviews.length > 0 && (
                   <div className="space-y-2">

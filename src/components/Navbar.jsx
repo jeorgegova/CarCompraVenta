@@ -20,8 +20,13 @@ const Navbar = () => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const fetchInProgressRef = useRef(false);
 
+  // Track initial mount and previous user ID to prevent unnecessary refetches
+  const initialMountRef = useRef(true);
+  const prevUserIdRef = useRef(null);
+
   useEffect(() => {
     let isMounted = true;
+    
     const fetchNotifications = async () => {
       if (!user || userRole !== 'buyer' || fetchInProgressRef.current) return;
       fetchInProgressRef.current = true;
@@ -46,7 +51,10 @@ const Navbar = () => {
 
         if (messagesError) {
           if (!isMounted) return;
-          setShowSessionExpiredModal(true);
+          // Solo mostrar modal de sesión expirada si es un error de autenticación real
+          if (messagesError.message?.includes('JWT') || messagesError.message?.includes('session') || messagesError.code === 'PGRST301') {
+            setShowSessionExpiredModal(true);
+          }
           return;
         }
 
@@ -66,7 +74,8 @@ const Navbar = () => {
       } catch (error) {
         if (!isMounted) return;
         console.error('Error fetching notifications:', error);
-        if (error.message?.includes('JWT') || error.message?.includes('session')) {
+        // Solo mostrar modal de sesión expirada si es un error de autenticación real
+        if (error.message?.includes('JWT') || error.message?.includes('session') || error.code === 'PGRST301') {
           setShowSessionExpiredModal(true);
         }
       } finally {
@@ -74,15 +83,23 @@ const Navbar = () => {
       }
     };
 
-    if (user && userRole) {
+    // Solo ejecutar fetchNotifications en el montaje inicial o cuando cambia el usuario realmente
+    const currentUserId = user?.id;
+    const shouldFetch = user && userRole === 'buyer' &&
+                       (initialMountRef.current || prevUserIdRef.current !== currentUserId);
+    
+    if (shouldFetch) {
       fetchNotifications();
-    } else {
+      initialMountRef.current = false;
+      prevUserIdRef.current = currentUserId;
+    } else if (!user) {
       setUnreadNotifications(0);
       setNotifications([]);
+      prevUserIdRef.current = null;
     }
 
     return () => { isMounted = false; };
-  }, [user, userRole]);
+  }, [user?.id, userRole]); // Solo depende del ID del usuario y el rol, no del objeto user completo
 
   const handleSignOut = async () => {
     try {
@@ -175,7 +192,7 @@ const Navbar = () => {
                 <button
                   onClick={() => {
                     if (window.location.pathname !== '/') {
-                      window.location.href = '/#services';
+                      navigate('/#services');
                     } else {
                       const servicesSection = document.getElementById('services');
                       if (servicesSection) {
@@ -192,7 +209,7 @@ const Navbar = () => {
                 <button
                   onClick={() => {
                     if (window.location.pathname !== '/') {
-                      window.location.href = '/#about';
+                      navigate('/#about');
                     } else {
                       const aboutSection = document.getElementById('about');
                       if (aboutSection) {
@@ -413,7 +430,7 @@ const Navbar = () => {
               <button
                 onClick={() => {
                   if (window.location.pathname !== '/') {
-                    window.location.href = '/#services';
+                    navigate('/#services');
                   } else {
                     const servicesSection = document.getElementById('services');
                     if (servicesSection) {
@@ -429,7 +446,7 @@ const Navbar = () => {
               <button
                 onClick={() => {
                   if (window.location.pathname !== '/') {
-                    window.location.href = '/#about';
+                    navigate('/#about');
                   } else {
                     const aboutSection = document.getElementById('about');
                     if (aboutSection) {

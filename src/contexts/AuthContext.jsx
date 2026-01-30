@@ -11,7 +11,11 @@ export const AuthProvider = ({ children }) => {
   const [userRole, setUserRole] = useState(null)
   const [roleLoading, setRoleLoading] = useState(false)
   const [notification, setNotification] = useState(null)
-  const [welcomeShown, setWelcomeShown] = useState(false)
+  const [welcomeShown, setWelcomeShown] = useState(() => {
+    // Leer el estado de welcomeShown desde localStorage al inicializar
+    const stored = localStorage.getItem('welcomeShown')
+    return stored === 'true'
+  })
   const [sessionError, setSessionError] = useState(false)
   const [profile, setProfile] = useState(null)
   const [userName, setUserName] = useState('')
@@ -52,6 +56,8 @@ export const AuthProvider = ({ children }) => {
   const mountedRef = useRef(true)
   const subscriptionRef = useRef(null)
   const initAttemptedRef = useRef(false)
+  // Nuevo: rastrear el ID de usuario actual para evitar reprocesar SIGNED_IN en refresh
+  const currentUserIdRef = useRef(null)
 
   // Limpiar notificación
   const clearNotification = () => setNotification(null)
@@ -62,6 +68,9 @@ export const AuthProvider = ({ children }) => {
       type: 'success',
       duration: 5000,
     })
+    // Marcar que ya se mostró la bienvenida y persistir
+    setWelcomeShown(true)
+    localStorage.setItem('welcomeShown', 'true')
   }
 
   // Obtener rol del usuario
@@ -107,7 +116,6 @@ export const AuthProvider = ({ children }) => {
       // Mostrar bienvenida solo una vez
       if (!welcomeShown && data.first_name) {
         showWelcomeNotification(fullName)
-        setWelcomeShown(true)
       }
     } catch (error) {
       console.error('Error fetching user profile:', error)
@@ -133,6 +141,7 @@ export const AuthProvider = ({ children }) => {
           setSessionError(true)
         } else if (session?.user) {
           setUser(session.user)
+          currentUserIdRef.current = session.user.id // ← establecer usuario actual para comparaciones futuras
           setUserName(session.user.email ?? '')
 
           // Intentar cargar datos desde localStorage primero para UI inmediata
@@ -155,6 +164,7 @@ export const AuthProvider = ({ children }) => {
         } else {
           // Limpiar datos si no hay sesión
           setUser(null)
+          currentUserIdRef.current = null
           setUserRole(null)
           setProfile(null)
           setUserName('')
@@ -179,22 +189,36 @@ export const AuthProvider = ({ children }) => {
 
         if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
           setUser(null)
+          currentUserIdRef.current = null
           setUserRole(null)
           setWelcomeShown(false)
+          localStorage.removeItem('welcomeShown')
+          localStorage.removeItem('userData')
           return
         }
 
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        // Solo procesar SIGNED_IN cuando el usuario realmente cambia, no al refrescar
+        if (event === 'SIGNED_IN') {
           const currentUser = session?.user ?? null
+          const newUserId = currentUser?.id ?? null
+
+          // Si es el mismo usuario, ignorar para evitar re-renders y refetches innecesarios
+          if (newUserId && currentUserIdRef.current === newUserId) {
+            console.log('Auth event SIGNED_IN ignored: same user (likely token refresh)')
+            return
+          }
+
           setUser(currentUser)
+          currentUserIdRef.current = newUserId
           if (currentUser) {
             setUserName(currentUser.email ?? '')
-            // Fetch user role in background without blocking
+            // Fetch user role en background sin bloquear
             fetchUserRole(currentUser.id).catch(error => {
               console.error('Error fetching user role on auth change:', error)
             })
           }
         }
+        // Ignorar TOKEN_REFRESHED para evitar re-renders innecesarios
       }
     )
 
@@ -256,6 +280,7 @@ export const AuthProvider = ({ children }) => {
       await supabase.auth.signOut()
       setWelcomeShown(false)
       setUser(null)
+      currentUserIdRef.current = null
       setUserRole(null)
       setProfile(null)
       setUserName('')
