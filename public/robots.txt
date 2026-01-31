@@ -1,4 +1,10 @@
 User-agent: *
 Allow: /
 
+# Disallow private areas
+Disallow: /account
+Disallow: /chats
+Disallow: /seller/
+Disallow: /admin/
+
 Sitemap: https://conectacar.com/sitemap.xml

@@ -76,12 +76,41 @@ const Vehicles = () => {
     });
   };
 
+  const canonicalUrl = window.location.origin + window.location.pathname;
+
   return (
     <>
       <Helmet>
         <title>Vehículos en Venta - Conecta Car</title>
         <meta name="description" content="Explora una amplia selección de vehículos usados en Colombia. Encuentra carros de todas las marcas y modelos con filtros avanzados." />
         <meta name="keywords" content="vehículos usados Colombia, carros en venta, compra venta autos" />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:title" content="Vehículos en Venta - Conecta Car" />
+        <meta property="og:description" content="Explora una amplia selección de vehículos usados en Colombia. Encuentra carros de todas las marcas y modelos con filtros avanzados." />
+        <meta property="og:image" content="/logo.png" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Conecta Car" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Vehículos en Venta - Conecta Car" />
+        <meta name="twitter:description" content="Explora una amplia selección de vehículos usados en Colombia. Encuentra carros de todas las marcas y modelos con filtros avanzados." />
+        <meta name="twitter:image" content="/logo.png" />
+        {vehicles.length > 0 && (
+          <script type="application/ld+json">
+            {JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "ItemList",
+              "itemListElement": vehicles.map((v, idx) => ({
+                "@type": "ListItem",
+                "position": idx + 1,
+                "url": `${window.location.origin}/vehicles/${v.id}`,
+                "name": `${v.brand} ${v.model} ${v.year}`,
+                ...(v.images?.[0] ? { "image": v.images[0] } : {}),
+                ...(v.price ? { "offers": { "@type": "Offer", "price": v.price, "priceCurrency": "COP", "availability": "https://schema.org/InStock" } } : {})
+              }))
+            })}
+          </script>
+        )}
       </Helmet>
       <div className="min-h-screen font-sans text-gray-900 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

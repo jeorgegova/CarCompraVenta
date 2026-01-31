@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async'
 
 const UserAccount = () => {
   const { user, signOut, runQuery } = useAuth();
@@ -176,6 +177,10 @@ const UserAccount = () => {
   if (loading) {
     return (
       <div className="min-h-screen font-sans text-gray-900 bg-gray-50 flex justify-center items-center">
+        <Helmet>
+          <meta name="robots" content="noindex,nofollow" />
+          <link rel="canonical" href={window.location.origin + window.location.pathname} />
+        </Helmet>
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600"></div>
       </div>
     );
@@ -183,6 +188,10 @@ const UserAccount = () => {
 
   return (
     <div className="min-h-screen font-sans text-gray-900 bg-gray-50">
+      <Helmet>
+        <meta name="robots" content="noindex,nofollow" />
+        <link rel="canonical" href={window.location.origin + window.location.pathname} />
+      </Helmet>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         <div className="mb-4 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Mi Cuenta</h1>

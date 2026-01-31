@@ -225,26 +225,27 @@ const Home = () => {
         <meta property="og:title" content="Conecta Car - Compra y Venta de Vehículos" />
         <meta property="og:description" content="Tu plataforma confiable para comprar y vender vehículos en Colombia con servicios completos de tránsito." />
         <meta property="og:image" content="/logo.png" />
-        <meta property="og:url" content="https://conectacar.com" />
+        <meta property="og:url" content={window.location.origin + window.location.pathname} />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Conecta Car - Compra y Venta de Vehículos" />
         <meta name="twitter:description" content="Tu plataforma confiable para comprar y vender vehículos en Colombia con servicios completos de tránsito." />
         <meta name="twitter:image" content="/logo.png" />
+        <link rel="canonical" href={window.location.origin + window.location.pathname} />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Organization",
-            "name": "Conecta Car",
-            "url": "https://conectacar.com",
-            "logo": "https://conectacar.com/logo.png",
-            "description": "Plataforma para compra y venta de vehículos en Colombia",
-            "contactPoint": {
+            name: "Conecta Car",
+            url: "https://conectacar.com",
+            logo: "https://conectacar.com/logo.png",
+            description: "Plataforma para compra y venta de vehículos en Colombia",
+            contactPoint: {
               "@type": "ContactPoint",
-              "telephone": "+57-300-620-5493",
-              "contactType": "customer service",
-              "areaServed": "CO",
-              "availableLanguage": "es"
+              telephone: "+57-300-620-5493",
+              contactType: "customer service",
+              areaServed: "CO",
+              availableLanguage: "es"
             }
           })}
         </script>

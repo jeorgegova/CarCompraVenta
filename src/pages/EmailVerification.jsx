@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { Helmet } from 'react-helmet-async'
 
 const EmailVerification = () => {
   const [searchParams] = useSearchParams();
@@ -66,6 +67,10 @@ const EmailVerification = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 flex items-center justify-center p-5">
+      <Helmet>
+        <meta name="robots" content="noindex,nofollow" />
+        <link rel="canonical" href={window.location.origin + window.location.pathname} />
+      </Helmet>
       <div className="w-full max-w-md">
         <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-gray-100/60 overflow-hidden transition-all duration-500">
           {/* Header */}
@@ -183,4 +188,4 @@ const styleSheet = document.createElement('style');
 styleSheet.textContent = styles;
 document.head.appendChild(styleSheet);
 
-export default EmailVerification; 
+export default EmailVerification;

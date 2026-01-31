@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import UploadVehicle from '../components/seller/UploadVehicle';
 import VehicleTraceability from '../components/seller/VehicleTraceability';
+import { Helmet } from 'react-helmet-async'
 
 const SellerDashboard = () => {
   const { user } = useAuth();
@@ -11,6 +12,10 @@ const SellerDashboard = () => {
 
   return (
     <div className="min-h-screen font-sans text-gray-900 bg-gray-50">
+      <Helmet>
+        <meta name="robots" content="noindex,nofollow" />
+        <link rel="canonical" href={window.location.origin + window.location.pathname} />
+      </Helmet>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         <div className="mb-4 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Panel de Vendedor</h1>

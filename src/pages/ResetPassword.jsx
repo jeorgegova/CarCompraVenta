@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { Helmet } from 'react-helmet-async'
 
 const ResetPassword = () => {
   const [password, setPassword] = useState('');
@@ -48,6 +49,10 @@ const ResetPassword = () => {
   if (success) {
     return (
       <div className="min-h-screen font-sans text-gray-900 bg-gray-50">
+        <Helmet>
+          <meta name="robots" content="noindex,nofollow" />
+          <link rel="canonical" href={window.location.origin + window.location.pathname} />
+        </Helmet>
         <div className="flex items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8">
           <div className="max-w-md w-full space-y-8">
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-8 text-center">
@@ -63,6 +68,10 @@ const ResetPassword = () => {
 
   return (
     <div className="min-h-screen font-sans text-gray-900 bg-gray-50">
+      <Helmet>
+        <meta name="robots" content="noindex,nofollow" />
+        <link rel="canonical" href={window.location.origin + window.location.pathname} />
+      </Helmet>
       <div className="flex items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           <div className="text-center">

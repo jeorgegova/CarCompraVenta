@@ -7,12 +7,17 @@ import AdminUploadVehicle from '../components/admin/AdminUploadVehicle';
 import VehicleManagement from '../components/admin/VehicleManagement';
 import AdminEditVehicle from '../components/admin/AdminEditVehicle';
 import SalesHistory from './admin/SalesHistory';
+import { Helmet } from 'react-helmet-async'
 
 const AdminDashboard = () => {
   const location = useLocation();
 
   return (
     <div className="min-h-screen font-sans text-gray-900 bg-gray-50">
+      <Helmet>
+        <meta name="robots" content="noindex,nofollow" />
+        <link rel="canonical" href={window.location.origin + window.location.pathname} />
+      </Helmet>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         <div className="mb-4 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Panel de Administrador</h1>
