@@ -273,7 +273,7 @@ const Home = () => {
                             Compra y Venta de Vehículos
                           </h1>
                           <p className="text-lg md:text-xl font-light opacity-90 drop-shadow-lg">
-                            Acompañamiento Personalizado a Comprador y Vendedor
+                            Acompañamiento Personalizado entre Comprador y Vendedor
                           </p>
                         </div>
                       </div>
