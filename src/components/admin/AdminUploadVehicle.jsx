@@ -22,6 +22,8 @@ const AdminUploadVehicle = () => {
   const [imageFiles, setImageFiles] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [processingImages, setProcessingImages] = useState(false);
+  const [processingProgress, setProcessingProgress] = useState(0);
   const [message, setMessage] = useState('');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
@@ -78,32 +80,61 @@ const AdminUploadVehicle = () => {
     }
   };
 
-  // Comprimir imagen
-  const compressImage = (file, maxWidth = 1200, maxHeight = 900, quality = 0.8) => {
+  // Comprimir imagen - versión optimizada que libera memoria inmediatamente
+  const compressImage = async (file, maxWidth = 1200, maxHeight = 900, quality = 0.7) => {
     return new Promise((resolve, reject) => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
       const img = new Image();
-
+      const url = URL.createObjectURL(file);
+      
+      const cleanup = () => URL.revokeObjectURL(url);
+      
       img.onload = () => {
-        let { width, height } = img;
-        if (width > height && width > maxWidth) {
-          height = (height * maxWidth) / width;
-          width = maxWidth;
-        } else if (height > maxHeight) {
-          width = (width * maxHeight) / height;
-          height = maxHeight;
+        try {
+          // Calcular dimensiones reducidas para evitar cargar imagen completa
+          let { width, height } = img;
+          if (width > height && width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          } else if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+          
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          
+          // Usar imageSmoothingEnabled para mejor calidad
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          
+          // Dibujar imagen en canvas (libera memoria de img)
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // Liberar memoria de img inmediatamente
+          img.src = '';
+          cleanup();
+          
+          canvas.toBlob((blob) => {
+            if (blob) {
+              resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+            } else {
+              reject(new Error('Failed to create blob'));
+            }
+          }, 'image/jpeg', quality);
+        } catch (error) {
+          cleanup();
+          reject(error);
         }
-        canvas.width = width;
-        canvas.height = height;
-        ctx.drawImage(img, 0, 0, width, height);
-        canvas.toBlob((blob) => {
-          if (blob) resolve(new File([blob], file.name, { type: 'image/jpeg' }));
-          else reject(new Error('Failed to create blob'));
-        }, 'image/jpeg', quality);
       };
-      img.onerror = () => reject(new Error('Failed to load image'));
-      img.src = URL.createObjectURL(file);
+      
+      img.onerror = () => {
+        cleanup();
+        reject(new Error('Failed to load image'));
+      };
+      
+      img.src = url;
     });
   };
 
@@ -122,28 +153,45 @@ const AdminUploadVehicle = () => {
 
   const handleImageSelect = async (e) => {
     const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+    
     const previews = [];
     const processedFiles = [];
+    setProcessingImages(true);
+    setProcessingProgress(0);
 
-    for (const file of files) {
-      // Aceptar imágenes estándar y archivos HEIC/HEIF
-      if (file.type.startsWith('image/') || isHeicFile(file)) {
-        try {
-          const processedFile = await processImage(file);
-          const previewUrl = URL.createObjectURL(processedFile);
-          previews.push(previewUrl);
-          processedFiles.push(processedFile);
-        } catch (err) {
-          console.error('Error processing image:', err);
-          const previewUrl = URL.createObjectURL(file);
-          previews.push(previewUrl);
-          processedFiles.push(file);
+    // Usar setTimeout para permitir que el render actualice el estado de carga
+    setTimeout(async () => {
+      try {
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          
+          // Aceptar imágenes estándar y archivos HEIC/HEIF
+          if (file.type.startsWith('image/') || isHeicFile(file)) {
+            try {
+              const processedFile = await processImage(file);
+              const previewUrl = URL.createObjectURL(processedFile);
+              previews.push(previewUrl);
+              processedFiles.push(processedFile);
+            } catch (err) {
+              console.error('Error processing image:', err);
+              const previewUrl = URL.createObjectURL(file);
+              previews.push(previewUrl);
+              processedFiles.push(file);
+            }
+          }
+          
+          // Actualizar progreso
+          setProcessingProgress(Math.round(((i + 1) / files.length) * 100));
         }
+        
+        setImageFiles((prev) => [...prev, ...processedFiles]);
+        setImagePreviews((prev) => [...prev, ...previews]);
+      } finally {
+        setProcessingImages(false);
+        setProcessingProgress(0);
       }
-    }
-
-    setImageFiles((prev) => [...prev, ...processedFiles]);
-    setImagePreviews((prev) => [...prev, ...previews]);
+    }, 50);
   };
 
   const removeImage = (index) => {
@@ -400,10 +448,22 @@ const AdminUploadVehicle = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">Imágenes del vehículo (opcional)</label>
               <div className="space-y-4">
                 <input type="file" multiple accept="image/*,.heic,.heif" onChange={handleImageSelect}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500" />
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500" disabled={processingImages} />
                 <p className="text-sm text-gray-500">Las imágenes se comprimirán automáticamente. Formatos soportados: JPG, PNG, WEBP, HEIC (Samsung).</p>
 
-                {imagePreviews.length > 0 && (
+                {processingImages && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-blue-700">Procesando imágenes...</span>
+                      <span className="text-sm text-blue-700">{processingProgress}%</span>
+                    </div>
+                    <div className="w-full bg-blue-200 rounded-full h-2">
+                      <div className="bg-blue-600 h-2 rounded-full transition-all duration-200" style={{ width: `${processingProgress}%` }}></div>
+                    </div>
+                  </div>
+                )}
+
+                {imagePreviews.length > 0 && !processingImages && (
                   <div className="space-y-2">
                     <p className="text-sm font-medium text-gray-700">Previsualización:</p>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4">
