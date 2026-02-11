@@ -8,7 +8,6 @@ import Breadcrumb from './components/Breadcrumb';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Vehicles from './pages/Vehicles';
 import VehicleDetail from './pages/VehicleDetail';
 import UserAccount from './pages/UserAccount';
 import BuyerChats from './pages/BuyerChats';
@@ -30,13 +29,7 @@ const AppContent = () => {
 
     const items = [{ label: 'Inicio', path: '/' }];
 
-    if (pathSegments[0] === 'vehicles') {
-      items.push({ label: 'Vehículos', path: '/vehicles' });
-      if (pathSegments[1]) {
-        // This would need vehicle data to show the name, for now just show ID
-        items.push({ label: `Vehículo ${pathSegments[1]}` });
-      }
-    } else if (pathSegments[0] === 'account') {
+    if (pathSegments[0] === 'account') {
       items.push({ label: 'Mi Cuenta' });
     } else if (pathSegments[0] === 'seller') {
       items.push({ label: 'Panel Vendedor' });
@@ -88,7 +81,6 @@ const AppContent = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/verify-email" element={<EmailVerification />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/vehicles" element={<Vehicles />} />
         <Route path="/vehicles/:id" element={<VehicleDetail />} />
         <Route
           path="/account"
