@@ -21,36 +21,50 @@ export const AuthProvider = ({ children }) => {
   const [userName, setUserName] = useState('')
   const roleFetchInFlightRef = useRef(false)
 
+  const sessionPromiseRef = useRef(null);
+
   const ensureSessionReady = async () => {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (session?.access_token) return session
-    await supabase.auth.refreshSession()
-    return await new Promise((resolve) => {
-      const { data: listener } = supabase.auth.onAuthStateChange((event, s) => {
-        if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') {
-          listener.subscription.unsubscribe()
-          resolve(s)
-        }
-      })
-      setTimeout(() => {
-        listener.subscription.unsubscribe()
-        resolve(null)
-      }, 2000)
-    })
+    // If a session check/refresh is already in flight, reuse that promise
+    if (sessionPromiseRef.current) return sessionPromiseRef.current;
+
+    sessionPromiseRef.current = (async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session?.access_token) return session
+
+        const { data: { session: refreshedSession } } = await supabase.auth.refreshSession()
+        if (refreshedSession) return refreshedSession
+
+        return await new Promise((resolve) => {
+          const { data: listener } = supabase.auth.onAuthStateChange((event, s) => {
+            if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') {
+              listener.subscription.unsubscribe()
+              resolve(s)
+            }
+          })
+          setTimeout(() => {
+            listener.subscription.unsubscribe()
+            resolve(null)
+          }, 2000)
+        })
+      } finally {
+        // Clear the promise so next request can start fresh if needed
+        sessionPromiseRef.current = null;
+      }
+    })();
+
+    return sessionPromiseRef.current;
   }
-  const queryLockRef = useRef(Promise.resolve())
+
   const runQuery = async (executor) => {
-    const chain = queryLockRef.current.then(async () => {
-      await ensureSessionReady()
-      return await new Promise((resolve, reject) => {
-        const timer = setTimeout(() => reject(new Error('supabase_timeout')), 8000)
-        executor(supabase)
-          .then((res) => { clearTimeout(timer); resolve(res) })
-          .catch((err) => { clearTimeout(timer); reject(err) })
-      })
+    // Parallel execution permitted: ensure session is ready without blocking other queries
+    await ensureSessionReady()
+    return await new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error('supabase_timeout')), 15000) // Increased timeout for heavy loads
+      executor(supabase)
+        .then((res) => { clearTimeout(timer); resolve(res) })
+        .catch((err) => { clearTimeout(timer); reject(err) })
     })
-    queryLockRef.current = chain.catch(() => { })
-    return chain
   }
 
   const mountedRef = useRef(true)

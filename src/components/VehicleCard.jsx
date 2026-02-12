@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { Link } from 'react-router-dom';
 
-const VehicleCard = ({ vehicle }) => {
+const VehicleCard = memo(({ vehicle }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -41,13 +41,12 @@ const VehicleCard = ({ vehicle }) => {
                 key={index}
                 src={image}
                 alt={`${vehicle.brand} ${vehicle.model}`}
-                className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-in-out ${
-                  index === currentImageIndex
+                className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-in-out ${index === currentImageIndex
                     ? 'opacity-100 translate-x-0'
                     : index < currentImageIndex
-                    ? 'opacity-0 -translate-x-full'
-                    : 'opacity-0 translate-x-full'
-                }`}
+                      ? 'opacity-0 -translate-x-full'
+                      : 'opacity-0 translate-x-full'
+                  }`}
               />
             ))}
           </div>
@@ -81,9 +80,8 @@ const VehicleCard = ({ vehicle }) => {
               {images.map((_, index) => (
                 <div
                   key={index}
-                  className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all duration-300 ease-in-out ${
-                    index === currentImageIndex ? 'bg-white' : 'bg-white bg-opacity-50'
-                  }`}
+                  className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all duration-300 ease-in-out ${index === currentImageIndex ? 'bg-white' : 'bg-white bg-opacity-50'
+                    }`}
                 />
               ))}
             </div>
@@ -104,6 +102,8 @@ const VehicleCard = ({ vehicle }) => {
       </div>
     </Link>
   );
-};
+});
+
+VehicleCard.displayName = 'VehicleCard';
 
 export default VehicleCard;
