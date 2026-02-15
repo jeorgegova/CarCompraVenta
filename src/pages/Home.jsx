@@ -71,7 +71,7 @@ const Home = () => {
 
   const images = [
     compraVehiculo1,
-    'https://i.imgur.com/iuAVa9B.png',
+    /* 'https://i.imgur.com/iuAVa9B.png', */
   ];
 
   // Detectar si es móvil
@@ -482,40 +482,44 @@ const Home = () => {
             </div>
 
             {/* Botones de navegación */}
-            <button
-              onClick={prevSlide}
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center hover:bg-white/30 hover:scale-110 transition-all duration-300"
-              aria-label="Anterior"
-            >
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-
-            <button
-              onClick={nextSlide}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center hover:bg-white/30 hover:scale-110 transition-all duration-300"
-              aria-label="Siguiente"
-            >
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-
-            {/* Indicadores */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex justify-center gap-1.5">
-              {images.map((_, index) => (
+            {images.length > 1 &&
+              <>
                 <button
-                  key={index}
-                  onClick={() => setCurrentSlide(index)}
-                  className={`transition-all duration-300 ${index === currentSlide
-                    ? 'w-7 h-1.5 bg-white rounded-full shadow-md'
-                    : 'w-1.5 h-1.5 bg-white/50 rounded-full hover:bg-white/80 hover:scale-125'
-                    }`}
-                  aria-label={`Ir a slide ${index + 1}`}
-                />
-              ))}
-            </div>
+                  onClick={prevSlide}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center hover:bg-white/30 hover:scale-110 transition-all duration-300"
+                  aria-label="Anterior"
+                >
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+
+                <button
+                  onClick={nextSlide}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center hover:bg-white/30 hover:scale-110 transition-all duration-300"
+                  aria-label="Siguiente"
+                >
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+
+                {/* Indicadores */}
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex justify-center gap-1.5">
+                  {images.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentSlide(index)}
+                      className={`transition-all duration-300 ${index === currentSlide
+                        ? 'w-7 h-1.5 bg-white rounded-full shadow-md'
+                        : 'w-1.5 h-1.5 bg-white/50 rounded-full hover:bg-white/80 hover:scale-125'
+                        }`}
+                      aria-label={`Ir a slide ${index + 1}`}
+                    />
+                  ))}
+                </div>
+              </>
+            }
           </div>
         </section>
 
