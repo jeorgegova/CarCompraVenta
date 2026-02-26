@@ -27,6 +27,15 @@ const VehicleDetail = () => {
   const [sendingMessage, setSendingMessage] = useState(false);
   const [receiverId, setReceiverId] = useState(null);
 
+  const timeSlots = [];
+  for (let hour = 8; hour <= 18; hour++) {
+    for (let minute = 0; minute < 60; minute += 30) {
+      const h = String(hour).padStart(2, '0');
+      const m = String(minute).padStart(2, '0');
+      timeSlots.push(`${h}:${m}`);
+    }
+  }
+
   useEffect(() => {
     fetchVehicle();
   }, [id]);
@@ -401,12 +410,18 @@ const VehicleDetail = () => {
 
                 <div>
                   <label className="block text-sm mb-1">Hora</label>
-                  <input
-                    type="time"
+                  <select
                     value={reservationTime}
                     onChange={(e) => setReservationTime(e.target.value)}
-                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-gray-600"
-                  />
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-gray-600 bg-white"
+                  >
+                    <option value="">Selecciona una hora</option>
+                    {timeSlots.map((time) => (
+                      <option key={time} value={time}>
+                        {time}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <button

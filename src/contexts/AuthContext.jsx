@@ -211,6 +211,14 @@ export const AuthProvider = ({ children }) => {
           return
         }
 
+        if (event === 'PASSWORD_RECOVERY') {
+          console.log('Password recovery event triggered');
+          setNotification({
+            message: 'Puedes cambiar tu contraseña ahora.',
+            type: 'info',
+            duration: 8000
+          });
+        }
         // Solo procesar SIGNED_IN cuando el usuario realmente cambia, no al refrescar
         if (event === 'SIGNED_IN') {
           const currentUser = session?.user ?? null
@@ -289,6 +297,19 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  const resetPassword = async (email) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin,
+      })
+      if (error) throw error
+      return { success: true }
+    } catch (error) {
+      console.error('Reset password error:', error)
+      throw error
+    }
+  }
+
   const signOut = async () => {
     try {
       await supabase.auth.signOut()
@@ -333,6 +354,7 @@ export const AuthProvider = ({ children }) => {
         showWelcomeNotification,
         sessionError,
         refreshSession,
+        resetPassword,
       }}
     >
       {children}

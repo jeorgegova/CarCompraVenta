@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { ChevronLeft, ChevronRight, X, FileText, DollarSign, CheckCircle, AlertCircle } from "lucide-react"
+import { ChevronLeft, ChevronRight, X, FileText, DollarSign, CheckCircle, AlertCircle, MessageCircle } from "lucide-react"
 
 const ServicesCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -52,7 +52,7 @@ const ServicesCarousel = () => {
       documentation: ["Formulario de solicitud de trámite: Debe estar completamente diligenciado, legible, sin tachones ni enmendaduras, firmado por el propietario legal del vehículo.",
         "Improntas (numeraciones de chasís, serie, motor, vin) adheridas a la carta de inscripción de prenda o en su defecto al formulario de solicitud de trámite.",
         "Documento de la prenda: Cuando el acreedor prendario es una entidad bancaria o financiera: no se exigirá documento físico suscrito por la entidad prendaria siempre y cuando esté inscrito en el registro de garantías mobiliarias. En caso de no estar registrada la información en el RUNT, deberá aportar la carta de levantamiento de prenda entregada por el acreedor prendario y la representación legal (cámara de comercio o Superintendencia Bancaria) no superior a 30 días. Cuando el acreedor prendario es una persona natural: debe aportar la carta de levantamiento de prenda autenticada por el acreedor prendario con las siguientes características: Placa y características del vehículo, Firma del acreedor prendario u otorgante, Firma del deudor prendario (Deudor propietario)",
-        ],
+      ],
       cost: "Tarifas del trámite (Con certificado de tradición): Carro, moto, motocarro, remolque, maquinaria: $199.032 | Tarifas del trámite (Sin certificado de tradición): Carro, moto, motocarro, remolque, maquinaria: $138.403",
     },
     {
@@ -252,9 +252,8 @@ const ServicesCarousel = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-12 text-center">
             <div
-              className={`transition-all duration-1000 ${
-                isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-              }`}
+              className={`transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+                }`}
             >
               <span className="inline-block text-xs font-semibold text-slate-600 tracking-widest uppercase mb-4 px-4 py-2 bg-slate-100 rounded-full">
                 Nuestros Servicios
@@ -281,9 +280,8 @@ const ServicesCarousel = () => {
               {services.map((service, idx) => (
                 <div
                   key={service.id}
-                  className={`absolute inset-0 transition-all duration-700 ease-out ${
-                    idx === currentSlide ? "opacity-100 scale-100" : "opacity-0 scale-105 pointer-events-none"
-                  } ${idx === currentSlide ? "carousel-fade-enter" : ""}`}
+                  className={`absolute inset-0 transition-all duration-700 ease-out ${idx === currentSlide ? "opacity-100 scale-100" : "opacity-0 scale-105 pointer-events-none"
+                    } ${idx === currentSlide ? "carousel-fade-enter" : ""}`}
                 >
                   <img
                     src={service.image || "/placeholder.svg"}
@@ -298,9 +296,8 @@ const ServicesCarousel = () => {
 
                   {/* Content Container */}
                   <div
-                    className={`absolute inset-0 flex flex-col justify-end p-4 sm:p-6 md:p-8 lg:p-10 transition-all duration-700 ${
-                      idx === currentSlide ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
-                    } carousel-slide-content`}
+                    className={`absolute inset-0 flex flex-col justify-end p-4 sm:p-6 md:p-8 lg:p-10 transition-all duration-700 ${idx === currentSlide ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+                      } carousel-slide-content`}
                   >
                     <div className="max-w-xl">
                       <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-3 leading-tight">{service.title}</h3>
@@ -345,11 +342,10 @@ const ServicesCarousel = () => {
                   <button
                     key={index}
                     onClick={() => goToSlide(index)}
-                    className={`transition-all duration-300 rounded-full cursor-pointer ${
-                      index === currentSlide
-                        ? "w-8 h-2 sm:w-12 sm:h-3 bg-gradient-to-r from-slate-700 to-slate-900 shadow-md indicator-active"
-                        : "w-2 h-2 sm:w-3 sm:h-3 bg-gray-300 hover:bg-slate-400"
-                    }`}
+                    className={`transition-all duration-300 rounded-full cursor-pointer ${index === currentSlide
+                      ? "w-8 h-2 sm:w-12 sm:h-3 bg-gradient-to-r from-slate-700 to-slate-900 shadow-md indicator-active"
+                      : "w-2 h-2 sm:w-3 sm:h-3 bg-gray-300 hover:bg-slate-400"
+                      }`}
                     aria-label={`Ir a slide ${index + 1}`}
                   />
                 ))}
@@ -377,7 +373,7 @@ const ServicesCarousel = () => {
             <div className="relative bg-gradient-to-br from-slate-800 via-slate-700 to-slate-900 text-white p-8 overflow-hidden">
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
               <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full blur-2xl"></div>
-              
+
               <div className="relative flex justify-between items-start">
                 <div className="flex-1">
                   <div className="inline-block px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full text-xs font-semibold tracking-wider uppercase mb-3">
@@ -463,28 +459,48 @@ const ServicesCarousel = () => {
 
               {/* Costo de tránsito movido al final */}
               <div className="modal-item mb-6">
-                <div className="bg-gradient-to-br from-slate-50 to-gray-100 border-2 border-slate-200 rounded-xl p-6 shadow-sm">
-                  <div className="flex items-start gap-4">
-                    <div className="bg-slate-600 rounded-lg p-3 shadow-md">
+                <div className="bg-gradient-to-br from-slate-50 to-gray-100 border-2 border-slate-200 rounded-xl p-5 sm:p-6 shadow-sm">
+                  <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left">
+                    <div className="bg-slate-600 rounded-xl p-3 shadow-md">
                       <DollarSign className="w-6 h-6 text-white" />
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 w-full">
                       <h4 className="text-lg font-bold text-slate-900 mb-2">Costos de Tránsito</h4>
-                      <p className="text-slate-700 leading-relaxed mb-2">{selectedService.cost}</p>
-                      <p className="text-sm text-slate-600 italic">* No incluye el costo del servicio de gestoría</p>
+                      <p className="text-slate-700 leading-relaxed mb-1 text-sm sm:text-base">{selectedService.cost}</p>
+                      <p className="text-xs text-slate-500 italic mb-6">* No incluye el costo del servicio de gestoría</p>
+                      <a
+                        href={`https://wa.me/573006205493?text=Hola,%20quisiera%20obtener%20una%20cotizaci%C3%B3n%20para%20el%20servicio%20de%20${encodeURIComponent(selectedService.title)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex w-full sm:w-fit items-center justify-center gap-3 bg-[#25D366] hover:bg-[#128C7E] text-white px-6 py-4 sm:py-3 rounded-2xl sm:rounded-full transition-all duration-300 font-bold text-sm sm:text-base shadow-[0_4px_14px_0_rgba(37,211,102,0.39)] hover:shadow-[0_6px_20px_rgba(37,211,102,0.23)] transform hover:-translate-y-0.5"
+                      >
+                        <MessageCircle className="w-6 h-6 fill-current flex-shrink-0" />
+                        <span>Escríbenos para obtener cotización</span>
+                      </a>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Footer con acciones */}
-              <div className="mt-8 pt-6 border-t border-gray-200 flex flex-col sm:flex-row gap-3 justify-between items-center">
-                <p className="text-sm text-gray-500 italic">
-                  ¿Tienes dudas? Contáctanos para más información
-                </p>
+              <div className="mt-8 pt-6 border-t border-gray-200 flex flex-col md:flex-row gap-6 justify-between items-center text-center md:text-left">
+                <div className="flex flex-col gap-3">
+                  <p className="text-sm text-gray-500 font-medium italic">
+                    ¿Tienes dudas? Contáctanos para más información...
+                  </p>
+                  <a
+                    href={`https://wa.me/573006205493?text=Hola,%20tengo%20algunas%20dudas%20sobre%20el%20servicio%20de%20${encodeURIComponent(selectedService.title)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 bg-white border-2 border-[#25D366] text-[#128C7E] hover:bg-[#25D366] hover:text-white px-4 py-2 rounded-full transition-all duration-300 text-sm font-bold w-fit mx-auto md:mx-0 shadow-sm hover:shadow-md"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    Chat WhatsApp
+                  </a>
+                </div>
                 <button
                   onClick={() => setIsModalOpen(false)}
-                  className="bg-gradient-to-r from-slate-700 to-slate-900 text-white px-8 py-3 rounded-lg hover:from-slate-800 hover:to-black transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+                  className="bg-slate-900 text-white px-10 py-3 rounded-full hover:bg-black transition-all duration-300 font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 w-full md:w-auto"
                 >
                   Cerrar
                 </button>

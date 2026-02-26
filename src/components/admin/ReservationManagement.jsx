@@ -18,6 +18,15 @@ const ReservationManagement = () => {
   });
   const [submitting, setSubmitting] = useState(false);
 
+  const timeSlots = [];
+  for (let hour = 8; hour <= 18; hour++) {
+    for (let minute = 0; minute < 60; minute += 30) {
+      const h = String(hour).padStart(2, '0');
+      const m = String(minute).padStart(2, '0');
+      timeSlots.push(`${h}:${m}`);
+    }
+  }
+
   useEffect(() => {
     fetchReservations();
     fetchVehicles();
@@ -397,13 +406,19 @@ const ReservationManagement = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Hora de cita *
                 </label>
-                <input
-                  type="time"
+                <select
                   value={formData.reservation_time}
                   onChange={(e) => setFormData({ ...formData, reservation_time: e.target.value })}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
-                />
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 bg-white"
+                >
+                  <option value="">Selecciona una hora</option>
+                  {timeSlots.map((time) => (
+                    <option key={time} value={time}>
+                      {time}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">

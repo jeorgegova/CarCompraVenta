@@ -67,7 +67,7 @@ const AboutUsSection = () => {
             variants={itemVariants}
             className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed"
           >
-            Conoce nuestra misión y visión que nos guían en cada paso para ofrecerte el mejor servicio
+            Conoce la misión y visión que guían cada paso para ofrecerte el mejor servicio
           </motion.p>
         </motion.div>
 
