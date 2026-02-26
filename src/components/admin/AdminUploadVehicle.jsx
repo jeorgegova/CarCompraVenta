@@ -1,7 +1,9 @@
+import { processImage, isHeicFile } from '../../utils/imageUtils';
+
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
-import heic2any from 'heic2any';
+
 
 const AdminUploadVehicle = () => {
   const { user } = useAuth();
@@ -54,107 +56,12 @@ const AdminUploadVehicle = () => {
     }
   };
 
-  // Verificar si es archivo HEIC/HEIF
-  const isHeicFile = (file) => {
-    const fileName = file.name.toLowerCase();
-    const fileType = file.type.toLowerCase();
-    return fileName.endsWith('.heic') ||
-           fileName.endsWith('.heif') ||
-           fileType === 'image/heic' ||
-           fileType === 'image/heif';
-  };
 
-  // Convertir HEIC a JPEG
-  const convertHeicToJpeg = async (file) => {
-    try {
-      const convertedBlob = await heic2any({
-        blob: file,
-        toType: 'image/jpeg',
-        quality: 0.8
-      });
-      const newFileName = file.name.replace(/\.heic$/i, '.jpg').replace(/\.heif$/i, '.jpg');
-      return new File([convertedBlob], newFileName, { type: 'image/jpeg' });
-    } catch (error) {
-      console.error('Error converting HEIC:', error);
-      throw error;
-    }
-  };
-
-  // Comprimir imagen - versión optimizada que libera memoria inmediatamente
-  const compressImage = async (file, maxWidth = 1200, maxHeight = 900, quality = 0.7) => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      const url = URL.createObjectURL(file);
-      
-      const cleanup = () => URL.revokeObjectURL(url);
-      
-      img.onload = () => {
-        try {
-          // Calcular dimensiones reducidas para evitar cargar imagen completa
-          let { width, height } = img;
-          if (width > height && width > maxWidth) {
-            height = Math.round((height * maxWidth) / width);
-            width = maxWidth;
-          } else if (height > maxHeight) {
-            width = Math.round((width * maxHeight) / height);
-            height = maxHeight;
-          }
-          
-          const canvas = document.createElement('canvas');
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          
-          // Usar imageSmoothingEnabled para mejor calidad
-          ctx.imageSmoothingEnabled = true;
-          ctx.imageSmoothingQuality = 'high';
-          
-          // Dibujar imagen en canvas (libera memoria de img)
-          ctx.drawImage(img, 0, 0, width, height);
-          
-          // Liberar memoria de img inmediatamente
-          img.src = '';
-          cleanup();
-          
-          canvas.toBlob((blob) => {
-            if (blob) {
-              resolve(new File([blob], file.name, { type: 'image/jpeg' }));
-            } else {
-              reject(new Error('Failed to create blob'));
-            }
-          }, 'image/jpeg', quality);
-        } catch (error) {
-          cleanup();
-          reject(error);
-        }
-      };
-      
-      img.onerror = () => {
-        cleanup();
-        reject(new Error('Failed to load image'));
-      };
-      
-      img.src = url;
-    });
-  };
-
-  // Procesar imagen (convertir HEIC si es necesario y luego comprimir)
-  const processImage = async (file) => {
-    let processedFile = file;
-    
-    // Si es HEIC, convertir primero a JPEG
-    if (isHeicFile(file)) {
-      processedFile = await convertHeicToJpeg(file);
-    }
-    
-    // Luego comprimir
-    return await compressImage(processedFile);
-  };
 
   const handleImageSelect = async (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
-    
+
     const previews = [];
     const processedFiles = [];
     setProcessingImages(true);
@@ -165,26 +72,29 @@ const AdminUploadVehicle = () => {
       try {
         for (let i = 0; i < files.length; i++) {
           const file = files[i];
-          
-          // Aceptar imágenes estándar y archivos HEIC/HEIF
-          if (file.type.startsWith('image/') || isHeicFile(file)) {
-            try {
-              const processedFile = await processImage(file);
-              const previewUrl = URL.createObjectURL(processedFile);
-              previews.push(previewUrl);
-              processedFiles.push(processedFile);
-            } catch (err) {
-              console.error('Error processing image:', err);
-              const previewUrl = URL.createObjectURL(file);
-              previews.push(previewUrl);
-              processedFiles.push(file);
-            }
+
+          // Procesar cualquier archivo que parezca imagen
+          try {
+            // Calcular peso de este archivo en el total (1/N)
+            const fileWeight = 100 / files.length;
+            const fileBaseProgress = i * fileWeight;
+
+            const processedFile = await processImage(file, (stageProgress) => {
+              // stageProgress va de 0 a 100 para ESTE archivo
+              // Calcular progreso total: base + (progreso_archivo * peso_archivo / 100)
+              const currentTotalProgress = fileBaseProgress + (stageProgress * fileWeight / 100);
+              setProcessingProgress(Math.round(currentTotalProgress));
+            });
+
+            const previewUrl = URL.createObjectURL(processedFile);
+            previews.push(previewUrl);
+            processedFiles.push(processedFile);
+          } catch (err) {
+            console.error('Error processing image:', err);
+            alert(`Error al procesar la imagen ${file.name}. Intente con otro formato.`);
           }
-          
-          // Actualizar progreso
-          setProcessingProgress(Math.round(((i + 1) / files.length) * 100));
         }
-        
+
         setImageFiles((prev) => [...prev, ...processedFiles]);
         setImagePreviews((prev) => [...prev, ...previews]);
       } finally {
@@ -497,10 +407,10 @@ const AdminUploadVehicle = () => {
               )}
             </button>
           </form>
-       </div>
-     </div>
-   </div>
- );
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default AdminUploadVehicle;

@@ -1,7 +1,9 @@
+import { processImage, isHeicFile } from '../../utils/imageUtils';
+
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useParams, useNavigate } from 'react-router-dom';
-import heic2any from 'heic2any';
+
 
 const AdminEditVehicle = () => {
   const { id } = useParams();
@@ -35,6 +37,8 @@ const AdminEditVehicle = () => {
     action: null,
   });
   const [vehicleStatus, setVehicleStatus] = useState('');
+  const [processingImages, setProcessingImages] = useState(false);
+  const [processingProgress, setProcessingProgress] = useState(0);
 
   useEffect(() => {
     fetchVehicle();
@@ -87,73 +91,13 @@ const AdminEditVehicle = () => {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   };
 
-  // Verificar si es archivo HEIC/HEIF
-  const isHeicFile = (file) => {
-    const fileName = file.name.toLowerCase();
-    const fileType = file.type.toLowerCase();
-    return fileName.endsWith('.heic') ||
-           fileName.endsWith('.heif') ||
-           fileType === 'image/heic' ||
-           fileType === 'image/heif';
-  };
 
-  // Convertir HEIC a JPEG
-  const convertHeicToJpeg = async (file) => {
-    try {
-      const convertedBlob = await heic2any({
-        blob: file,
-        toType: 'image/jpeg',
-        quality: 0.8
-      });
-      const newFileName = file.name.replace(/\.heic$/i, '.jpg').replace(/\.heif$/i, '.jpg');
-      return new File([convertedBlob], newFileName, { type: 'image/jpeg' });
-    } catch (error) {
-      console.error('Error converting HEIC:', error);
-      throw error;
-    }
-  };
 
-  // Comprimir imagen
-  const compressImage = (file, maxWidth = 1200, maxHeight = 900, quality = 0.8) => {
-    return new Promise((resolve, reject) => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      const img = new Image();
 
-      img.onload = () => {
-        let { width, height } = img;
-        if (width > height && width > maxWidth) {
-          height = (height * maxWidth) / width;
-          width = maxWidth;
-        } else if (height > maxHeight) {
-          width = (width * maxHeight) / height;
-          height = maxHeight;
-        }
-        canvas.width = width;
-        canvas.height = height;
-        ctx.drawImage(img, 0, 0, width, height);
-        canvas.toBlob((blob) => {
-          if (blob) resolve(new File([blob], file.name, { type: 'image/jpeg' }));
-          else reject(new Error('Failed to create blob'));
-        }, 'image/jpeg', quality);
-      };
-      img.onerror = () => reject(new Error('Failed to load image'));
-      img.src = URL.createObjectURL(file);
-    });
-  };
 
-  // Procesar imagen (convertir HEIC si es necesario y luego comprimir)
-  const processImage = async (file) => {
-    let processedFile = file;
-    
-    // Si es HEIC, convertir primero a JPEG
-    if (isHeicFile(file)) {
-      processedFile = await convertHeicToJpeg(file);
-    }
-    
-    // Luego comprimir
-    return await compressImage(processedFile);
-  };
+
+
+
 
   const uploadImages = async (files) => {
     const urls = [];
@@ -173,26 +117,34 @@ const AdminEditVehicle = () => {
     const previews = [];
     const processedFiles = [];
 
-    for (const file of files) {
-      // Aceptar imágenes estándar y archivos HEIC/HEIF
-      if (file.type.startsWith('image/') || isHeicFile(file)) {
-        try {
-          const processedFile = await processImage(file);
-          const previewUrl = URL.createObjectURL(processedFile);
-          previews.push(previewUrl);
-          processedFiles.push(processedFile);
-        } catch (error) {
-          console.error('Error processing image:', error);
-          // Si falla el procesamiento, intentar usar el archivo original
-          const previewUrl = URL.createObjectURL(file);
-          previews.push(previewUrl);
-          processedFiles.push(file);
-        }
-      }
-    }
+    setProcessingImages(true);
+    setProcessingProgress(0);
 
-    setNewImageFiles((prev) => [...prev, ...processedFiles]);
-    setNewImagePreviews((prev) => [...prev, ...previews]);
+    // Usar setTimeout para permitir que el render actualice el estado de carga
+    setTimeout(async () => {
+      try {
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          try {
+            const processedFile = await processImage(file);
+            const previewUrl = URL.createObjectURL(processedFile);
+            previews.push(previewUrl);
+            processedFiles.push(processedFile);
+          } catch (error) {
+            console.error('Error processing image:', error);
+            alert(`Error al procesar la imagen ${file.name}. Intente con otro formato.`);
+          }
+          // Actualizar progreso
+          setProcessingProgress(Math.round(((i + 1) / files.length) * 100));
+        }
+
+        setNewImageFiles((prev) => [...prev, ...processedFiles]);
+        setNewImagePreviews((prev) => [...prev, ...previews]);
+      } finally {
+        setProcessingImages(false);
+        setProcessingProgress(0);
+      }
+    }, 50);
   };
 
   const removeImage = (index) => {
@@ -728,8 +680,20 @@ const AdminEditVehicle = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">Agregar nuevas imágenes</label>
               <div className="space-y-4">
                 <input type="file" multiple accept="image/*,.heic,.heif" onChange={handleImageSelect}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500" />
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500" disabled={processingImages} />
                 <p className="text-sm text-gray-500">Las imágenes se comprimirán automáticamente. Formatos soportados: JPG, PNG, WEBP, HEIC (Samsung).</p>
+
+                {processingImages && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-blue-700">Procesando imágenes...</span>
+                      <span className="text-sm text-blue-700">{processingProgress}%</span>
+                    </div>
+                    <div className="w-full bg-blue-200 rounded-full h-2">
+                      <div className="bg-blue-600 h-2 rounded-full transition-all duration-200" style={{ width: `${processingProgress}%` }}></div>
+                    </div>
+                  </div>
+                )}
 
                 {newImagePreviews.length > 0 && (
                   <div className="space-y-2">
