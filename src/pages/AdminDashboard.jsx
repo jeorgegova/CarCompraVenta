@@ -103,6 +103,7 @@ const AdminDashboard = () => {
                   >
                     Gestionar Reservas
                   </Link>
+                  {/* 
                   <Link
                     to="/admin/chats"
                     className={`flex-shrink-0 px-4 py-3 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${location.pathname === '/admin/chats'
@@ -112,6 +113,8 @@ const AdminDashboard = () => {
                   >
                     Gestionar Chats
                   </Link>
+                  */}
+
                   <Link
                     to="/admin/vehicles"
                     className={`flex-shrink-0 px-4 py-3 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${location.pathname === '/admin/vehicles'
@@ -151,7 +154,8 @@ const AdminDashboard = () => {
               <Route path="/" element={<VehicleApprovals />} />
               <Route path="/users" element={<UserManagement />} />
               <Route path="/reservations" element={<ReservationManagement />} />
-              <Route path="/chats" element={<ChatManagement />} />
+              {/* <Route path="/chats" element={<ChatManagement />} /> */}
+
               <Route path="/create-vehicle" element={<AdminUploadVehicle />} />
               <Route path="/vehicles" element={<VehicleManagement />} />
               <Route path="/edit-vehicle/:id" element={<AdminEditVehicle />} />

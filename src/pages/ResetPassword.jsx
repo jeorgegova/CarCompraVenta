@@ -32,14 +32,23 @@ const ResetPassword = () => {
       const { error } = await supabase.auth.updateUser({ password });
 
       if (error) {
-        setError(error.message);
+        // Translate common password update errors
+        const translations = {
+          'Password should be at least 6 characters': 'La contraseña debe tener al menos 6 caracteres',
+          'New password should be different from the old password': 'La nueva contraseña debe ser diferente a la anterior',
+          'Password is too weak': 'La contraseña es demasiado débil',
+          'Session not found': 'Sesión no encontrada',
+          'Invalid session': 'Sesión inválida'
+        };
+        setError(translations[error.message] || 'Error al actualizar la contraseña.');
       } else {
         setSuccess(true);
         setTimeout(() => {
           navigate('/login');
         }, 2000);
       }
-    } catch (err) {
+    } catch (error) {
+      console.error('Password update error:', error);
       setError('Error al actualizar la contraseña.');
     } finally {
       setLoading(false);

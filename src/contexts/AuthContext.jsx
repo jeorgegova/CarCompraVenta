@@ -76,6 +76,28 @@ export const AuthProvider = ({ children }) => {
   // Limpiar notificación
   const clearNotification = () => setNotification(null)
 
+  // Traducir mensajes de error de autenticación
+  const translateAuthError = (error) => {
+    if (!error) return error
+
+    const translations = {
+      'Invalid login credentials': 'Credenciales de inicio de sesión inválidas',
+      'User already registered': 'El usuario ya está registrado',
+      'Password should be at least 6 characters': 'La contraseña debe tener al menos 6 caracteres',
+      'Email not confirmed': 'Correo electrónico no confirmado',
+      'Email link is invalid or has expired': 'El enlace de correo electrónico es inválido o ha expirado',
+      'User not found': 'Usuario no encontrado',
+      'Unable to validate email address: invalid format': 'No se puede validar la dirección de correo electrónico: formato inválido',
+      'Signup is disabled': 'El registro está deshabilitado',
+      'Too many requests': 'Demasiadas solicitudes',
+      'Server error': 'Error del servidor',
+      'Invalid refresh token': 'Token de actualización inválido',
+      'Refresh token not found': 'Token de actualización no encontrado'
+    }
+
+    return translations[error.message] || error.message
+  }
+
   const showWelcomeNotification = (name) => {
     setNotification({
       message: `¡Bienvenido de vuelta, ${name}!`,
@@ -264,7 +286,10 @@ export const AuthProvider = ({ children }) => {
         password,
       })
 
-      if (error) throw error
+      if (error) {
+        const translatedError = new Error(translateAuthError(error))
+        throw translatedError
+      }
 
       setSessionError(false)
       return data
@@ -279,7 +304,10 @@ export const AuthProvider = ({ children }) => {
   const signUp = async (email, password, extraData = {}) => {
     try {
       const { data, error } = await supabase.auth.signUp({ email, password })
-      if (error) throw error
+      if (error) {
+        const translatedError = new Error(translateAuthError(error))
+        throw translatedError
+      }
 
       if (data.user) {
         await supabase.from('profiles').insert({
@@ -302,7 +330,10 @@ export const AuthProvider = ({ children }) => {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: window.location.origin,
       })
-      if (error) throw error
+      if (error) {
+        const translatedError = new Error(translateAuthError(error))
+        throw translatedError
+      }
       return { success: true }
     } catch (error) {
       console.error('Reset password error:', error)

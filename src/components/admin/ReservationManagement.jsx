@@ -95,12 +95,41 @@ const ReservationManagement = () => {
 
   const handleStatusChange = async (reservationId, newStatus) => {
     try {
+      // Find the old reservation to check status and get details
+      const reservation = reservations.find(r => r.id === reservationId);
+      if (!reservation) return;
+
+      const oldStatus = reservation.status;
+
       const { error } = await supabase
         .from('reservations')
         .update({ status: newStatus, updated_at: new Date().toISOString() })
         .eq('id', reservationId);
 
       if (error) throw error;
+
+      // Send notification if status changed
+      if (oldStatus !== newStatus) {
+        const userEmail = reservation.profiles?.email;
+        if (userEmail) {
+          try {
+            await supabase.functions.invoke('send-email-notification', {
+              body: {
+                to: userEmail,
+                type: "reservation_status_changed",
+                marca: reservation.vehicles?.brand,
+                modelo: reservation.vehicles?.model,
+                fecha_reserva: formatDate(reservation.reservation_date),
+                hora_reserva: reservation.reservation_time,
+                estado_anterior: getStatusText(oldStatus),
+                estado_nuevo: getStatusText(newStatus)
+              }
+            });
+          } catch (emailError) {
+            console.error('Error sending email notification:', emailError);
+          }
+        }
+      }
 
       // Refresh the list
       fetchReservations();
@@ -149,7 +178,7 @@ const ReservationManagement = () => {
         user_id: formData.user_id,
         reservation_date: formData.reservation_date,
         reservation_time: formData.reservation_time,
-        status: 'pending',
+        status: showCreateModal ? 'pending' : selectedReservation.status,
         updated_at: new Date().toISOString(),
       };
 

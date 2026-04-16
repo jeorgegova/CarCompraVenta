@@ -253,6 +253,7 @@ const Navbar = () => {
                       </Link>
                     )}
 
+                    {/* 
                     {userRole === 'buyer' && (
                       <div className="relative">
                         <button
@@ -325,6 +326,8 @@ const Navbar = () => {
                         )}
                       </div>
                     )}
+                    */}
+
 
                     {userRole === 'seller' && (
                       <Link
@@ -345,6 +348,7 @@ const Navbar = () => {
                           Panel Admin
                           <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gray-900 group-hover:w-full transition-all duration-200"></span>
                         </Link>
+                        {/* 
                         <Link
                           to="/admin/chats"
                           className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition duration-200 relative group"
@@ -355,6 +359,8 @@ const Navbar = () => {
                           Chats
                           <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gray-900 group-hover:w-full transition-all duration-200"></span>
                         </Link>
+                        */}
+
                       </>
                     )}
 
@@ -468,6 +474,7 @@ const Navbar = () => {
                   Mi Cuenta
                 </Link>
               )}
+              {/* 
               {userRole === 'buyer' && (
                 <Link
                   to="/chats"
@@ -477,6 +484,8 @@ const Navbar = () => {
                   Chats
                 </Link>
               )}
+              */}
+
               {userRole === 'seller' && (
                 <Link
                   to="/seller"
@@ -495,6 +504,7 @@ const Navbar = () => {
                   >
                     Panel Admin
                   </Link>
+                  {/* 
                   <Link
                     to="/admin/chats"
                     onClick={() => setShowMobileMenu(false)}
@@ -502,6 +512,8 @@ const Navbar = () => {
                   >
                     Chats
                   </Link>
+                  */}
+
                 </>
               )}
               <div className="border-t border-gray-200 mt-4 pt-4">
